@@ -1,0 +1,3 @@
+3D assets used in 랜선 스키장 (all CC0 1.0 — public domain)
+- Kenney Holiday Kit, Food Kit — Kenney (www.kenney.nl), via github.com/shorepine/kenney mirror
+- KayKit Furniture Bits 1.0, Restaurant Bits 1.0 — Kay Lousberg (www.kaylousberg.com), github.com/KayKit-Game-Assets

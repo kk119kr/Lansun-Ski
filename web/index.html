@@ -84,7 +84,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#cfe6ff;font-family:
 #acts.top button{font-size:14px;padding:8px 12px;min-width:0;animation:none}
 #acts.top .main{background:rgba(47,111,176,.9)}
 #brake{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);color:#fff;background:rgba(229,83,61,.85);border-radius:999px;padding:4px 14px;font-size:14px;display:none;z-index:6;pointer-events:none}
-@media (pointer:coarse){#chase{top:auto;bottom:128px;font-size:15px;width:max-content;max-width:94vw}body.sliding #chatRow,body.sliding #quick,body.sliding #obj,body.sliding #tools{display:none}body.sliding #chat{bottom:auto;top:104px}body.sliding #log{max-height:64px}#acts.top{top:56px;left:12px;transform:none;justify-content:flex-start}#chat{width:calc(100vw - 170px)}#log{max-height:80px}#prompt{bottom:auto;top:22%}}
+@media (pointer:coarse){#chase{top:auto;bottom:128px;font-size:15px;width:max-content;max-width:94vw}body.sliding #chatRow,body.sliding #quick,body.sliding #obj,body.sliding #tools{display:none}body.touch.sliding #chat{bottom:auto;top:104px}body.sliding #chat{pointer-events:none}body.sliding #chatRow,body.sliding #quick{pointer-events:auto}body.sliding #log{max-height:64px}#acts.top{top:56px;left:12px;transform:none;justify-content:flex-start}#chat{width:calc(100vw - 170px)}#log{max-height:80px}#prompt{bottom:auto;top:22%}}
 body.touch #obj,body.touch #best,body.touch #help,body.touch #prompt,body.touch #steer,body.touch #stance,body.touch #tools{display:none!important}
 body.touch #loc{font-size:13px;padding:5px 11px;border-width:2px;top:10px;left:10px}
 body.touch #mini{cursor:pointer;width:84px;height:124px;top:10px;right:10px;opacity:.85;border-width:2px;border-radius:12px}
@@ -362,17 +362,24 @@ const cafeRoof=[];const cafe=building(40,-654,22,10,5.2,0xb98a5e,0x6a3e2a,'☕ �
   // 앞면을 유리로: 앞쪽 벽 대신 기둥+유리
   g.children[0].scale.z=0.2;g.children[0].position.z=-4;
   box(22,0.3,10,0x9a7048,0,0.15,0,g);
-  [-11,-5.5,0,5.5,11].forEach(x=>box(0.4,5.2,0.4,0x6a3e2a,x,2.6,4.8,g));
-  const gp=mesh(new THREE.BoxGeometry(22,4,0.1),glass,0,2.8,4.9,g);gp.castShadow=false;
+  [-11,-5.5,5.5,11].forEach(x=>box(0.4,5.2,0.4,0x6a3e2a,x,2.6,4.8,g));
+  box(11.6,0.5,0.5,0x6a3e2a,0,5.0,4.8,g);
+  const gp=mesh(new THREE.BoxGeometry(5.5,4,0.1),glass,-8.25,2.8,4.9,g);gp.castShadow=false;const gp2=mesh(new THREE.BoxGeometry(5.5,4,0.1),glass,8.25,2.8,4.9,g);gp2.castShadow=false;
+  // 넓은 열린 입구: 완만한 경사 데크 + 계단 + 손잡이
+  box(10,0.15,3.2,0x9a7048,0,0.07,6.6,g);box(10,0.3,1.4,0x8a6240,0,0.15,5.6,g);
+  [0.1,0.2,0.3].forEach((hh,i)=>box(10,hh,0.7,0x8a6240,0,hh/2,8.6-i*0.45,g));
+  [-5.2,5.2].forEach(x=>{box(0.12,0.12,3.6,0x6a3e2a,x,0.95,6.9,g);box(0.12,0.9,0.12,0x6a3e2a,x,0.45,5.2,g);box(0.12,0.9,0.12,0x6a3e2a,x,0.45,8.6,g)});
+  [-1.4,1.4].forEach(x=>cyl(0.07,0.07,1.6,0xffd34a,x,0.8,9.4,g,8));
+  box(10,0.04,3,0xe9d9b8,0,0.17,6.4,g);
   [-11,11].forEach(x=>box(0.3,5.2,10,0xb98a5e,x,2.6,0,g));
-  box(18,0.12,0.9,0x7a5236,0,1.05,4.1,g);
-  [-7,-3.5,0,3.5,7].forEach(x=>cyl(0.28,0.28,0.75,0xd8483a,x,0.38,3.1,g,10));
+  [-8,8].forEach(x=>box(5,0.12,0.9,0x7a5236,x,1.05,4.1,g));
+  [-8.5,-7,7,8.5].forEach(x=>cyl(0.28,0.28,0.75,0xd8483a,x,0.38,3.1,g,10));
   box(5,1.1,1.2,0x6a3e2a,-6,0.55,-2.6,g);box(2.4,2,0.5,0x333333,-6,2.2,-3.3,g);
   cyl(0.5,0.5,3,0x777777,8,6.5,-2,g);
   const t=label('핫초코 · 어묵 · 떡볶이 · 컵라면 · 썰매',{scale:7,depth:true,font:40});t.position.set(0,6.2,5.2);g.add(t);
-  obst.length=obst.length-1;obst.push({t:'r',x1:29,x2:51,z1:-659,z2:-657},{t:'r',x1:28.6,x2:29.4,z1:-659,z2:-649},{t:'r',x1:50.6,x2:51.4,z1:-659,z2:-649},{t:'r',x1:29,x2:46.5,z1:-649.5,z2:-648.7},{t:'r',x1:31,x2:46.5,z1:-650.4,z2:-649.4},{t:'r',x1:31.5,x2:36.5,z1:-657.3,z2:-656},{t:'r',x1:43.3,x2:46.7,z1:-657.6,z2:-656.4},{t:'c',x:45,z:-655.3,r:0.9},{t:'c',x:41.9,z:-655.3,r:0.7},{t:'c',x:48.1,z:-655.3,r:0.7});
+  obst.length=obst.length-1;obst.push({t:'r',x1:29,x2:51,z1:-659,z2:-657},{t:'r',x1:28.6,x2:29.4,z1:-659,z2:-649},{t:'r',x1:50.6,x2:51.4,z1:-659,z2:-649},{t:'r',x1:29,x2:34,z1:-650.4,z2:-648.7},{t:'r',x1:46,x2:51,z1:-650.4,z2:-648.7},{t:'r',x1:31.5,x2:36.5,z1:-657.3,z2:-656},{t:'r',x1:43.3,x2:46.7,z1:-657.6,z2:-656.4},{t:'c',x:45,z:-655.3,r:0.9},{t:'c',x:41.9,z:-655.3,r:0.7},{t:'c',x:48.1,z:-655.3,r:0.7});
   cafeRoof.push(g.children[1],g.children[2],g.children[3],t);
-  const dl=label('🚪',{scale:1.6,depth:true});dl.position.set(8.8,3.2,5.2);g.add(dl);
+  const dl=label('🚪 입구 (계단·경사로)',{scale:4,depth:true,font:46});dl.position.set(0,4.4,5.4);g.add(dl);
 }
 // 입구 게이트
 {box(1.2,6,1.2,0x7a4a32,-8,3,99);box(1.2,6,1.2,0x7a4a32,8,3,99);box(18,1.4,1.4,0x8a5a3c,0,6.4,99);const l=label('⛷️ 랜선 스키 리조트',{scale:7,depth:true});l.position.set(0,8.4,99.8);scene.add(l);obst.push({t:'c',x:-8,z:99,r:0.8},{t:'c',x:8,z:99,r:0.8})}
@@ -855,7 +862,7 @@ function checkBoard(){
         pose(me,'sit');gearVis();updHelp();toast(ch.npcs.length?'다른 사람 의자에 같이 탔어요! 👋 정상에서 자동으로 내려요':'리프트 탑승! 정상에서 자동으로 내려요');if(!camUser)camMode=1;return}}
     }}
 }
-function liftSeat(){const {L,ch,si}=P.lift;return ch.g.localToWorld(new V3(-1.2+si*0.8,-2.45,0.12))}
+function liftSeat(){const {L,ch,si}=P.lift;ch.g.updateMatrixWorld(true);return ch.g.localToWorld(new V3(-1.2+si*0.8,-2.45,0.12))}
 function liftWindow(){const {L,ch}=P.lift,s=ch.s;if(s>L.L1-5&&s<L.L1-0.3)return{where:'top',p:(s-(L.L1-5))/4.7};const b=2*L.L1+L.LT;if(s>b-5&&s<b-0.3)return{where:'bot',p:(s-(b-5))/4.7};return null}
 function tryUnload(){const w=liftWindow();if(!w){toast(isTouch?'하차장에 도착하면 버튼이 빨갛게 바뀌어요':'하차장에 도착하면 SPACE');return}
   const {L,ch,si}=P.lift;ch.seats[si]=null;ch.barDown=false;
@@ -1005,7 +1012,7 @@ function updSky(){const t=(dayPhase()+0.25)%1;let i=0;while(i<SKY.length-2&&t>SK
 /* ================= 카메라 ================= */
 const camPos=new V3(0,20,100),camLook=new V3(),camLookS=new V3();
 function updCamera(dt){
-  const head=new V3();me.head.getWorldPosition(head);
+  me.root.updateMatrixWorld(true);const head=new V3();me.head.getWorldPosition(head);
   const showHead=camMode!==2;me.head.visible=showHead;if(me.label)me.label.visible=false;
   let yaw;
   if(!gest&&P.state==='slide'&&!P.ready&&performance.now()-gestT>2500)camOff*=1-Math.min(1,dt*2);

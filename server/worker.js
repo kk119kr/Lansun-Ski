@@ -51,7 +51,7 @@ export class Room {
     }
 
     const id = this.nextId++;
-    const p = { id, ws: server, n: '스키어', g: 'm', o: {}, last: null, dirty: false, seen: Date.now(), lastChat: 0, hello: false };
+    const p = { id, ws: server, n: '스키어', g: 'm', o: {}, last: null, dirty: false, seen: Date.now(), lastChat: 0, lastSb: 0, lastHit: 0, hello: false };
     this.players.set(id, p);
 
     server.addEventListener('message', (ev) => this.onMessage(p, ev.data));
@@ -96,6 +96,20 @@ export class Room {
       if (!text) return;
       p.lastChat = now;
       this.broadcast({ t: 'c', id: p.id, n: p.n, m: text }, p);
+    } else if (m.t === 'sb' && p.hello && Array.isArray(m.a) && m.a.length === 6) {
+      // 눈덩이: 던진 모습을 다른 사람들에게도 보여주기만 해요 (명중 판정은 던진 사람 쪽에서)
+      const now = Date.now();
+      if (now - p.lastSb < 200) return;
+      p.lastSb = now;
+      const a = m.a.map((v) => Math.round(num(v, -2000, 2000) * 100) / 100);
+      this.broadcast({ t: 'sb', id: p.id, a }, p);
+    } else if (m.t === 'hit' && p.hello) {
+      const now = Date.now();
+      if (now - p.lastHit < 250) return;
+      p.lastHit = now;
+      const q = this.players.get(m.to | 0);
+      if (!q || q === p || !q.hello) return;
+      this.broadcast({ t: 'hit', id: q.id, by: p.id }, p);
     }
   }
 

@@ -84,7 +84,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#cfe6ff;font-family:
 #acts.top button{font-size:14px;padding:8px 12px;min-width:0;animation:none}
 #acts.top .main{background:rgba(47,111,176,.9)}
 #brake{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);color:#fff;background:rgba(229,83,61,.85);border-radius:999px;padding:4px 14px;font-size:14px;display:none;z-index:6;pointer-events:none}
-@media (pointer:coarse){#chase{top:auto;bottom:128px;font-size:15px;width:max-content;max-width:94vw}body.sliding #chat,body.sliding #obj,body.sliding #tools{display:none}#acts.top{top:56px;left:12px;transform:none;justify-content:flex-start}#chat{width:calc(100vw - 170px)}#log{max-height:80px}#prompt{bottom:auto;top:22%}}
+@media (pointer:coarse){#chase{top:auto;bottom:128px;font-size:15px;width:max-content;max-width:94vw}body.sliding #chatRow,body.sliding #quick,body.sliding #obj,body.sliding #tools{display:none}body.sliding #chat{bottom:auto;top:104px}body.sliding #log{max-height:64px}#acts.top{top:56px;left:12px;transform:none;justify-content:flex-start}#chat{width:calc(100vw - 170px)}#log{max-height:80px}#prompt{bottom:auto;top:22%}}
 body.touch #obj,body.touch #best,body.touch #help,body.touch #prompt,body.touch #steer,body.touch #stance,body.touch #tools{display:none!important}
 body.touch #loc{font-size:13px;padding:5px 11px;border-width:2px;top:10px;left:10px}
 body.touch #mini{cursor:pointer;width:84px;height:124px;top:10px;right:10px;opacity:.85;border-width:2px;border-radius:12px}
@@ -92,8 +92,7 @@ body.touch #mini{cursor:pointer;width:84px;height:124px;top:10px;right:10px;opac
 #menuBtn{display:none;position:fixed;top:14px;right:64px;z-index:9;width:38px;height:38px;border-radius:50%;border:2px solid #cfdcea;background:rgba(255,255,255,.92);font-size:18px;font-family:inherit;color:#2c3a4a}
 body.touch #menuBtn{display:block}
 body.touch #chat{width:calc(100vw - 150px);left:10px;bottom:12px}
-body.touch #msg{display:none}
-body.touch.chatOpen #msg{display:block}
+body.touch #msg{font-size:14px;padding:6px 11px;border-width:2px}
 body.touch #log{max-height:none}
 body.touch #log div{transition:opacity .6s}
 body.touch #log div.old{opacity:0}
@@ -106,6 +105,29 @@ body.touch #acts{right:10px;bottom:12px}
 body.touch #acts .main{font-size:17px;padding:13px 18px;min-width:84px}
 body.touch #acts.top{top:54px;left:10px;bottom:auto;right:auto;transform:none}
 @media (max-width:700px),(pointer:coarse){#help{display:none}#tools{left:12px;right:auto;top:98px;bottom:auto}#tHelp{display:none}#best{top:140px}#mini{width:110px;height:162px}#obj{max-width:calc(100vw - 140px);white-space:normal;border-radius:16px}}
+#chatRow{display:flex;gap:6px;align-items:center}
+#msg{flex:1;min-width:0;width:auto}
+#qBtn,#sendBtn{flex:none;font-family:inherit;font-size:17px;width:42px;height:42px;border-radius:50%;border:3px solid #cfdcea;background:#fff;cursor:pointer;color:#2c3a4a;padding:0}
+body.touch #qBtn,body.touch #sendBtn{width:38px;height:38px;font-size:16px;border-width:2px}
+#quick{position:fixed;left:10px;bottom:62px;width:min(330px,calc(100vw - 20px));display:none;flex-wrap:wrap;gap:6px;background:rgba(255,255,255,.97);border:3px solid #cfdcea;border-radius:18px;padding:8px;z-index:12;max-height:44vh;overflow:auto;box-shadow:0 4px 0 rgba(40,70,110,.15)}
+#quick.on{display:flex}
+#quick button{font-family:inherit;font-size:15px;border:2px solid #cfdcea;background:#f4f9ff;border-radius:999px;padding:7px 12px;color:#2c3a4a;cursor:pointer}
+#pcard{position:fixed;left:50%;top:64px;transform:translateX(-50%);display:none;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;background:rgba(255,255,255,.97);border:3px solid #cfdcea;border-radius:20px;padding:8px 10px;z-index:12;max-width:94vw;box-shadow:0 4px 0 rgba(40,70,110,.18)}
+#pcard.on{display:flex}
+#pcard b{font-weight:400;font-size:16px}
+#pcard small{color:#7d8da0;margin-right:4px}
+#pcard button{font-family:inherit;font-size:14px;border:2px solid #cfdcea;background:#fff;border-radius:999px;padding:6px 11px;cursor:pointer;color:#2c3a4a}
+#pcard button.hot{background:#2f6fb0;color:#fff;border-color:#2f6fb0}
+#aim{position:fixed;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border:3px solid rgba(255,255,255,.95);border-radius:50%;box-shadow:0 0 0 2px rgba(20,35,55,.3);display:none;z-index:6;pointer-events:none}
+#aim::after{content:'';position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;background:#fff;border-radius:50%;box-shadow:0 0 0 1px rgba(20,35,55,.4)}
+#aim.on{display:block}
+#aim.lock{border-color:#ff4d4d;width:60px;height:60px;margin:-30px 0 0 -30px}
+#aim b{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:400;background:rgba(20,35,55,.8);color:#fff;border-radius:999px;padding:3px 12px}
+#aim.lock b{background:rgba(255,77,77,.92)}
+#splat{position:fixed;inset:0;pointer-events:none;z-index:8;opacity:0;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.96) 0,rgba(255,255,255,.88) 30%,rgba(255,255,255,0) 66%)}
+#splat.on{animation:splat .7s ease-out}
+@keyframes splat{0%{opacity:1}100%{opacity:0}}
+body.aiming #chat,body.aiming #tools,body.aiming #obj,body.aiming #best,body.aiming #quick{display:none!important}
 </style>
 </head>
 <body>
@@ -123,7 +145,8 @@ body.touch #acts.top{top:54px;left:10px;bottom:auto;right:auto;transform:none}
 <div id="chase"></div>
 <div id="toast"></div>
 <div id="trick"></div>
-<div id="chat"><div id="log"></div><input id="msg" maxlength="60" placeholder="Enter로 채팅…" autocomplete="off"></div>
+<div id="chat"><div id="log"></div><div id="chatRow"><button id="qBtn" aria-label="빠른 말풍선">💬</button><input id="msg" maxlength="60" placeholder="Enter로 채팅…" autocomplete="off"><button id="sendBtn" aria-label="보내기">➤</button></div></div>
+<div id="quick"></div><div id="pcard"></div><div id="aim"><b></b></div><div id="splat"></div>
 <div id="modal" class="modal"><div class="sheet" id="modalIn"></div></div>
 <div id="start" class="modal on"><div class="sheet">
   <h2>⛷️ 랜선 스키장</h2>
@@ -565,7 +588,7 @@ const cvs=renderer.domElement;if(isTouch)document.body.classList.add('touch');
 const ptrs=new Map();let gest=null,gestT=-1e9,camOff=0,camPit=0,camZoom=1;
 function gcen(){let x=0,y=0;ptrs.forEach(p=>{x+=p.x;y+=p.y});const n=ptrs.size||1;x/=n;y/=n;let dist=0;if(ptrs.size>=2){const a=[...ptrs.values()];dist=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)}return{x,y,dist}}
 cvs.addEventListener('contextmenu',e=>e.preventDefault());
-cvs.addEventListener('pointerdown',e=>{initAudio();$('#msg').blur();lastType=e.pointerType||'mouse';
+cvs.addEventListener('pointerdown',e=>{initAudio();$('#msg').blur();$('#quick').classList.remove('on');lastType=e.pointerType||'mouse';
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(e.button===2||ptrs.size>=2){F.down=false;F.moved=999;gest=gcen();try{cvs.setPointerCapture(e.pointerId)}catch(_){}return}
   F.down=true;F.id=e.pointerId;F.x=F.sx=F.px=e.clientX;F.y=F.sy=F.py=e.clientY;F.t0=e.timeStamp;F.moved=0;try{cvs.setPointerCapture(e.pointerId)}catch(_){}
@@ -575,6 +598,7 @@ cvs.addEventListener('pointermove',e=>{mouseX=e.clientX;mouseY=e.clientY;lastTyp
   if(gest){const c=gcen();camOff-=(c.x-gest.x)*0.007;camPit=clamp(camPit+(c.y-gest.y)*0.004,-0.45,0.9);if(c.dist>0&&gest.dist>0)camZoom=clamp(camZoom*gest.dist/c.dist,0.55,2.4);gest=c;gestT=performance.now();return}
   if(!F.down||e.pointerId!==F.id)return;
   const dx=e.clientX-F.x,dy=e.clientY-F.y;F.x=e.clientX;F.y=e.clientY;F.moved+=Math.abs(dx)+Math.abs(dy);
+  if(AIM.on){AIM.yaw-=dx*0.0055;AIM.pit=clamp(AIM.pit-dy*0.0045,-0.6,0.95);return}
   if(P.state==='lift'||P.state==='sit'){lookYaw-=dx*0.006;lookPitch=clamp(lookPitch-dy*0.004,-1.2,0.8)}});
 function fingerUp(e){if(!F.down||e.pointerId!==F.id)return;F.down=false;const dt=e.timeStamp-F.t0,dy=e.clientY-F.sy,dx=e.clientX-F.sx;
   if(F.moved<14)onTap(e.clientX,e.clientY);
@@ -585,8 +609,11 @@ addEventListener('pointerup',ptrUp);addEventListener('pointercancel',ptrUp);
 function groundAt(sx,sy){const v=new V3((sx/innerWidth)*2-1,-(sy/innerHeight)*2+1,0.5).unproject(camera).sub(camera.position).normalize();const o=camera.position;
   for(let t=1;t<400;t+=1.5){const x=o.x+v.x*t,y=o.y+v.y*t,z=o.z+v.z*t;if(y<h(x,z)){let a=t-1.5,b=t;for(let k=0;k<8;k++){const m=(a+b)/2;if(o.y+v.y*m<h(o.x+v.x*m,o.z+v.z*m))b=m;else a=m}return{x:o.x+v.x*b,z:o.z+v.z*b}}}return null}
 function onTap(sx,sy){if(!me||modalOpen)return;
+  if(AIM.on){aimThrow();return}
+  const pr=pickPlayer(sx,sy);if(pr){showPCard(pr);return}
+  hidePCard();
   if(P.state==='lift')return;
-  if(P.state==='walk'){const g=groundAt(sx,sy);if(g){P.target=g;tapRing(g.x,g.z)}}}
+  if(P.state==='walk'){const g=groundAt(sx,sy);if(g){P.target=g;P.path=null;P.liftWait=null;NET.follow=null;tapRing(g.x,g.z)}}}
 function onFlickUp(){if(P.state==='slide'&&!P.air&&P.mode!=='sled'&&P.mode!=='onefoot')doJump()}
 function doJump(){P.vy=Math.max(P.vy,0)+5.2;P.air=true;P.trick={yaw:0,flip:0}}
 const tring=new THREE.Mesh(new THREE.RingGeometry(0.4,0.65,24),new THREE.MeshBasicMaterial({color:0x2f6fb0,transparent:true,opacity:0}));tring.rotation.x=-Math.PI/2;scene.add(tring);
@@ -601,6 +628,12 @@ addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 const msg=$('#msg');msg.addEventListener('focus',()=>typing=true);msg.addEventListener('blur',()=>{typing=false;document.body.classList.remove('chatOpen')});
 msg.addEventListener('keydown',e=>{if(e.key==='Enter'){const t=msg.value.trim();if(t)say(t);msg.value='';msg.blur();e.preventDefault()}if(e.key==='Escape')msg.blur();e.stopPropagation()});
+if(isTouch)msg.placeholder='채팅…';
+const QUICK=['안녕하세요~ 👋','같이 타요!','아 그만해!!','으앗 차가워!','눈싸움 할래요? ❄️','이얍!!','맞혔다 ㅋㅋ','살려줘요 ㅠㅠ','경치 최고예요~','한 번 더!','리프트 같이 타요~','으아아아!!','고마워요 ☺️','잠깐만 기다려줘요~','여기예요 여기!','와 대박…','귀여워라 🐣','조심해요~!'];
+const quickEl=$('#quick');quickEl.innerHTML=QUICK.map((t,i)=>`<button data-q="${i}">${t}</button>`).join('');
+$('#qBtn').onclick=e=>{e.stopPropagation();quickEl.classList.toggle('on')};
+quickEl.addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;if(me)say(QUICK[+b.dataset.q]);quickEl.classList.remove('on')});
+$('#sendBtn').onclick=e=>{e.stopPropagation();const t=msg.value.trim();if(t&&me)say(t);msg.value='';msg.blur()};
 $('#menuBtn').onclick=()=>{if(!me)return;openModal(`<h2>메뉴</h2><div class="menu" style="margin-top:12px"><button id="mCam">🎥 시점 바꾸기<small>${['위에서','뒤에서','1인칭'][camMode]}</small></button><button id="mTime">🌗 시간 바꾸기<small>낮 → 노을 → 밤</small></button><button id="mChat">💬 채팅 쓰기</button><button id="mWear">👕 옷 갈아입기</button><button id="mMap">🗺️ 지도 · 길찾기</button><button id="mHelp">❓ 조작법</button><button id="mCred">🎨 에셋 출처</button></div><div class="row"><button class="btn alt" id="mX">닫기</button></div>`,el=>{
   el.querySelector('#mCam').onclick=()=>{camUser=true;camMode=(camMode+1)%3;closeModal();toast(['🎥 위에서 보기','🎥 뒤에서 보기','🎥 1인칭'][camMode])};
   el.querySelector('#mTime').onclick=()=>{closeModal();$('#tTime').onclick()};
@@ -619,6 +652,8 @@ $('#tTime').onclick=()=>{dayOff+=0.18;const t=(dayPhase()+0.25)%1;toast(t<0.55?'
 let camMode=0,camUser=false;
 function onPress(k){
   if(!me)return;
+  if(AIM.on){if(k==='escape'||k==='x')aimEnd();else if(k===' ')aimThrow();return}
+  if(k==='g'){aimStart();return}
   if(k==='v'){camUser=true;camMode=(camMode+1)%3;return}
   if(P.state==='edu')return;
   if(P.state==='lift'){
@@ -673,6 +708,7 @@ function updHelp(){let h='';
 let tuckOn=false,actSig='';
 const actsEl=document.getElementById('acts');
 function actions(){const a=[];if(!me||P.state==='edu')return a;
+  if(AIM.on){a.push({cls:'hot',t:'🎯 던지기',f:aimThrow},{cls:'sub',t:'✖ 그만',f:aimEnd});return a}
   if(P.state==='lift'){a.push({k:'grp',items:[{t:'👋',f:()=>emote('wave')},{t:'🦵',f:()=>emote('legs')},{t:P.lift.ch.barDown?'🔓':'🔒',f:()=>onPress('3')}]});return a}
   if(P.state==='sit'){a.push({t:'일어나기',f:standUp});return a}
   if(P.state==='fallen')return a;
@@ -684,6 +720,8 @@ function actions(){const a=[];if(!me||P.state==='edu')return a;
   if(P.gear&&!P.sledOn&&(P.state!=='slide'||P.ready)||P.onefoot)a.push({cls:'sub',t:P.onefoot?'한발 해제':'한발',f:()=>onPress('f')});
   if(!isTouch&&P.state==='slide'&&P.mode!=='sled'&&P.mode!=='onefoot')a.push({cls:'sub',t:'⤴ 점프',f:()=>{if(!P.air)doJump()}});
   if(P.mode==='ski'&&P.state==='slide')a.push({k:'grp',items:[{t:'A자',on:P.stance==='A',f:()=>{if(P.stance!=='A')onPress('q')}},{t:'11자',on:P.stance==='11',f:()=>{if(P.stance!=='11')onPress('q')}}],tog:true});
+  if(P.ticket&&!P.sledOn&&(P.state==='walk'||(P.state==='slide'&&(P.ready||P.speed<2)))&&nearLiftL())a.push({cls:'main',t:P.liftWait?'⏳ 기다리는 중 (취소)':'🚡 리프트 기다리기',f:liftWaitToggle});
+  if(canSnow())a.push({cls:'sub',t:'❄️ 눈싸움',f:()=>aimStart()});
   return a}
 function renderActs(){const a=actions();const sl=(P.state==='slide'&&!P.ready)||P.state==='fallen';actsEl.classList.toggle('top',sl);document.body.classList.toggle('sliding',sl);const sig=P.state+P.ready+JSON.stringify(a.map(x=>[x.t,x.cls,x.items&&x.items.map(i=>i.t+i.on)]));if(sig===actSig)return;actSig=sig;actsEl.innerHTML='';
   a.forEach((x,i)=>{if(x.k==='grp'){const g=document.createElement('div');g.className='grp';x.items.forEach(it=>{const b=document.createElement('button');b.className=x.tog?('tog'+(it.on?' on':'')):'sub';b.textContent=it.t;b.onclick=e=>{e.stopPropagation();initAudio();it.f();actSig=''};g.appendChild(b)});actsEl.appendChild(g);return}
@@ -813,7 +851,7 @@ function checkBoard(){
       const gx=L.load.x-L.u.x*4,gz=L.load.z-L.u.z*4;if(Math.hypot(P.x-gx,P.z-gz)<3){P.x-=L.u.x*0.6;P.z-=L.u.z*0.6}}
     if(d<2.4&&P.ticket&&P.speed<7){
       for(const ch of L.chairs){const s=ch.s;if(s>L.Lt-1.2||s<0.9){const free=ch.seats.map((v,i)=>v?null:i).filter(v=>v!==null);if(!free.length)continue;
-        const si=free.includes(1)?1:free.includes(2)?2:free[0];ch.seats[si]='me';P.state='lift';askedLift=true;P.lift={L,ch,si,missed:false,phase:'up'};P.air=false;P.vx=P.vz=0;lookYaw=0;lookPitch=-0.1;
+        const si=free.includes(1)?1:free.includes(2)?2:free[0];ch.seats[si]='me';P.liftWait=null;P.state='lift';askedLift=true;P.lift={L,ch,si,missed:false,phase:'up'};P.air=false;P.vx=P.vz=0;lookYaw=0;lookPitch=-0.1;
         pose(me,'sit');gearVis();updHelp();toast(ch.npcs.length?'다른 사람 의자에 같이 탔어요! 👋 정상에서 자동으로 내려요':'리프트 탑승! 정상에서 자동으로 내려요');if(!camUser)camMode=1;return}}
     }}
 }
@@ -822,7 +860,7 @@ function liftWindow(){const {L,ch}=P.lift,s=ch.s;if(s>L.L1-5&&s<L.L1-0.3)return{
 function tryUnload(){const w=liftWindow();if(!w){toast(isTouch?'하차장에 도착하면 버튼이 빨갛게 바뀌어요':'하차장에 도착하면 SPACE');return}
   const {L,ch,si}=P.lift;ch.seats[si]=null;ch.barDown=false;
   let px,pz,hd;if(w.where==='top'){px=L.Tu.x-L.r.x*4.5+L.u.x*0.5;pz=L.Tu.z-L.r.z*4.5+L.u.z*0.5;hd=Math.atan2(-L.r.x,-L.r.z)}else{px=L.Bd.x+L.r.x*4;pz=L.Bd.z+L.r.z*4;hd=Math.atan2(L.r.x,L.r.z)}
-  P.x=px;P.z=pz;P.y=h(px,pz);P.heading=hd;P.vx=P.vz=0;P.lift=null;P.state='walk';camYaw=hd;setMode();if(P.mode==='ski'||P.mode==='board')P.ready=true;actSig='';
+  P.x=px;P.z=pz;P.y=h(px,pz);P.heading=hd;P.vx=P.vz=0;P.lift=null;P.state='walk';camYaw=hd;if(P.reworn&&w.where==='top')P.worn=true;P.reworn=false;setMode();if(P.mode==='ski'||P.mode==='board')P.ready=true;actSig='';
   toast(w.where==='top'?(P.ready?'정상 도착! 방향을 정하고 ▶ 출발':'정상 도착! 코스 표지판을 보고 골라보세요 ⛷️'):'베이스로 돌아왔어요');updHelp();progress();
 }
 function updLift(dt){
@@ -912,9 +950,9 @@ function updWalk(dt){
   const yaw=(camMode===0?Math.PI:camYaw)+camOff;
   const fx=Math.sin(yaw),fz=Math.cos(yaw),rx=-Math.cos(yaw),rz=Math.sin(yaw);
   let mx=fx*iz+rx*ix,mz=fz*iz+rz*ix,run=!!keys.shift;
-  if(mx||mz)P.target=null;
+  if(mx||mz){P.target=null;P.liftWait=null;NET.follow=null}
   else if(F.down){const v=new V3(P.x,P.y+1,P.z).project(camera),px=(v.x+1)/2*innerWidth,py=(1-v.y)/2*innerHeight,sx=F.x-px,sy=F.y-py,dl=Math.hypot(sx,sy);
-    if(dl>28){P.target=null;const cf=new V3();camera.getWorldDirection(cf);cf.y=0;cf.normalize();const cr=new V3(-cf.z,0,cf.x);mx=cr.x*sx/dl-cf.x*sy/dl;mz=cr.z*sx/dl-cf.z*sy/dl;run=dl>170}}
+    if(dl>28){P.target=null;P.liftWait=null;NET.follow=null;const cf=new V3();camera.getWorldDirection(cf);cf.y=0;cf.normalize();const cr=new V3(-cf.z,0,cf.x);mx=cr.x*sx/dl-cf.x*sy/dl;mz=cr.z*sx/dl-cf.z*sy/dl;run=dl>170}}
   else if(P.target){const tx=P.target.x-P.x,tz=P.target.z-P.z,tl=Math.hypot(tx,tz);if(tl<0.6){P.target=P.path&&P.path.length?P.path.shift():null}else{mx=tx;mz=tz;run=tl>12||!!P.path}}
   const l=Math.hypot(mx,mz);
   if(l>0){mx/=l;mz/=l;const g=grad(P.x,P.z);const up=Math.max(0,g.x*mx+g.z*mz);let sp=(run?6.4:4.3)*Math.max(0.35,1-up*1.6);
@@ -974,12 +1012,12 @@ function updCamera(dt){
   if(P.state==='lift')yaw=P.heading+lookYaw;else if(P.state==='sit')yaw=P.heading+lookYaw;
   else if(P.state==='slide'||P.state==='fallen'){const vy=P.speed>2?Math.atan2(P.vx,P.vz):P.heading;camYaw+=wrapA(vy-camYaw)*Math.min(1,dt*(P.pipe||inPipeZone(P.x,-P.z)?0.35:0.9));yaw=camYaw}
   else yaw=camYaw;
-  yaw+=camOff;
+  yaw+=camOff;if(AIM.on&&AIM.fp)yaw=AIM.yaw;
   if(camMode===0){camPos.lerp(new V3(P.x+Math.sin(camOff)*19*camZoom,P.y+17*camZoom,P.z+Math.cos(camOff)*19*camZoom),Math.min(1,dt*5));camLook.set(P.x,P.y+1,P.z)}
   else if(camMode===1){const dx=Math.sin(yaw),dz=Math.cos(yaw);const lf=P.state==='lift',sl=P.state==='slide'&&!P.ready,back=(lf?5.5:sl?9.5:7.5)*camZoom,up=(lf?2.4:sl?4.4:3.2)*camZoom+camPit*7;
     const tp=new V3(P.x-dx*back,P.y+up,P.z-dz*back);tp.y=Math.max(tp.y,h(tp.x,tp.z)+1.3);const k=Math.min(1,dt*4);camPos.x+=(tp.x-camPos.x)*k;camPos.z+=(tp.z-camPos.z)*k;camPos.y+=(tp.y-camPos.y)*Math.min(1,dt*(sl?2.2:4));
     camLookS.lerp(new V3(P.x+dx*4,P.y+1.2,P.z+dz*4),Math.min(1,dt*(sl?5:12)));camLook.copy(camLookS)}
-  else{const pit=lookPitch-camPit,dx=Math.sin(yaw)*Math.cos(pit),dz=Math.cos(yaw)*Math.cos(pit),dy=Math.sin(pit);
+  else{const pit=AIM.on&&AIM.fp?AIM.pit:lookPitch-camPit,dx=Math.sin(yaw)*Math.cos(pit),dz=Math.cos(yaw)*Math.cos(pit),dy=Math.sin(pit);
     camPos.copy(head).add(new V3(Math.sin(yaw)*0.25,0.05,Math.cos(yaw)*0.25));camLook.set(camPos.x+dx*5,camPos.y+dy*5-(P.state==='slide'?0.8:0),camPos.z+dz*5)}
   if(camera.fov!==60){camera.fov=60}camera.near=camMode===2?0.05:0.1;camera.updateProjectionMatrix();
   camera.position.copy(camPos);
@@ -1056,7 +1094,7 @@ function tick(){
   placeChairs(T,dt);updNPC(dt);updParts(dt);updSky();
   if(started&&me){
     if(!modalOpen&&!typing){
-      if(P.state==='walk')updWalk(dt);else if(P.state==='slide')updSlide(dt);else if(P.state==='fallen')updFallen(dt);else if(P.state==='lift')updLift(dt);
+      if(AIM.on)updAim(dt);else if(P.state==='walk')updWalk(dt);else if(P.state==='slide')updSlide(dt);else if(P.state==='fallen')updFallen(dt);else if(P.state==='lift')updLift(dt);
       else if(P.state==='sit'){P.sitT+=dt;steamT-=dt;if(steamT<0&&foodMesh){steamT=0.25;puff(foodMesh.position.x,foodMesh.position.y+0.3,foodMesh.position.z,1,0.2,0xf4f4f4,0.6,0.5)}
         if(foodMesh&&P.sitT>2){const s=Math.max(0.15,1-(P.sitT-2)/14);foodMesh.scale.setScalar(s);me.armR.rotation.x=-1.2+Math.sin(P.sitT*3)*0.3;if(s<=0.16&&!P.ate){P.ate=true;showBubble('잘 먹었다! 😋')}}}
       else if(P.state==='edu'){P.eduT-=dt;$('#eduC').textContent=Math.ceil(P.eduT);eduSlide(Math.floor((10-P.eduT)/2));if(P.eduT<=0){$('#edu').classList.remove('on');P.state='walk';P.x=88;P.z=69;P.y=h(88,69);setMode();toast('교육 끝! 이제 착하게 타요 😇')}}
@@ -1083,7 +1121,7 @@ function tick(){
     pr.style.display=pt?'block':'none';pr.textContent=pt;renderActs();$('#brake').style.display=(P.state==='slide'&&brakeAmt>0.05)?'block':'none';
     tring.material.opacity=Math.max(0,tring.material.opacity-dt*1.2);
     if(windG)windG.gain.value=lerp(windG.gain.value,P.state==='slide'?clamp((P.speed-4)/30,0,0.25):0,0.1);
-    updRun(dt);updRes();updLoc();updObj();updCamera(dt);drawMini();drawFX();netTick(dt);
+    updRun(dt);updRes();updLoc();updObj();updCamera(dt);drawMini();drawFX();netTick(dt);applyReacts(dt);updBalls(dt);updBubs(dt);
   }else{camera.position.set(Math.sin(T*0.1)*60+20,60,90);camera.lookAt(20,30,-150)}
   if(pv&&pv.on&&pv.ch){pv.ch.root.rotation.y+=dt*0.9;pv.r.render(pv.sc,pv.cam)}
   renderer.render(scene,camera);
@@ -1137,7 +1175,7 @@ put('reindeer',13,h(13,93),93,{hgt:1.9,ry:-0.6});ob(13,93,0.8);
   [-40,-20,20,40].forEach(x=>put('frame',x,4.2,48.5,{hgt:1.6,ry:Math.PI}));
 }
 /* ================= 멀티플레이 (Cloudflare Durable Object) ================= */
-const NET={ws:null,id:0,on:false,full:false,remotes:new Map(),sendT:0,last:'',lastAt:0,px:0,pz:0,pt:0,retry:0,n:0};
+const NET={follow:null,ws:null,id:0,on:false,full:false,remotes:new Map(),sendT:0,last:'',lastAt:0,px:0,pz:0,pt:0,retry:0,n:0};
 const ST=['walk','slide','fallen','lift','sit','edu'],MD=[null,'ski','board','sled','onefoot'],SLEDS=[null,'bag','tub'];
 const SEND_GAP=0.2; // 초당 5번 보내요 (무료 한도 아끼기)
 if(window.SKI_SERVER){const sb=document.querySelector('#start .sub');sb.innerHTML=sb.innerHTML.replace('데모 버전 · 혼자 타보기','🌐 온라인 · 다 같이 타기')}
@@ -1163,6 +1201,8 @@ function netMsg(m){
     case 's':for(const a of m.p){const r=NET.remotes.get(a[0]);if(r)applySnap(r,a.slice(1))}break;
     case 'o':{const r=NET.remotes.get(m.id);if(r){const keep=r;rebuildRemote(keep,m.o)}break}
     case 'c':{addLog(`${m.n}: ${m.m}`);const r=NET.remotes.get(m.id);if(r)remoteBubble(r,m.m);break}
+    case 'sb':if(Array.isArray(m.a)&&m.a.length===6&&m.a.every(Number.isFinite))spawnBall(m.a[0],m.a[1],m.a[2],m.a[3],m.a[4],m.a[5],false);break;
+    case 'hit':{if(m.id===NET.id)iGotHit();else{const r=NET.remotes.get(m.id);if(r)reactChar(r.c,false,r)}break}
     case 'full':NET.full=true;toast('접속 인원이 가득 찼어요 😢 혼자 타는 모드로 시작해요');break;
   }}
 function buildRemoteChar(r,o){
@@ -1196,7 +1236,7 @@ function netSend(dt){
   const now=performance.now()/1000,gap=Math.max(0.05,now-NET.pt);
   let sp=Math.hypot(P.x-NET.px,P.z-NET.pz)/gap;if(sp>80||NET.pt===0)sp=0;
   NET.px=P.x;NET.pz=P.z;NET.pt=now;
-  const fl=(P.air?1:0)|(P.tuck?2:0)|(P.stance==='A'?4:0)|(P.worn?8:0);
+  const fl=(P.air?1:0)|(P.tuck?2:0)|(P.stance==='A'?4:0)|(P.worn?8:0)|(AIM.on?16:0);
   const a=[+P.x.toFixed(2),+P.y.toFixed(2),+P.z.toFixed(2),+wrapA(P.heading).toFixed(2),Math.max(0,ST.indexOf(P.state)),Math.max(0,MD.indexOf(P.mode||null)),+sp.toFixed(1),+(P.trick.yaw||0).toFixed(2),+(P.trick.flip||0).toFixed(2),+steerVal.toFixed(2),fl,P.gear==='ski'?1:P.gear==='board'?2:0,Math.max(0,SLEDS.indexOf(P.sled||null))];
   const key=a.join(',');if(key===NET.last&&now-NET.lastAt<2)return;
   NET.last=key;NET.lastAt=now;NET.ws.send(JSON.stringify({t:'p',a}));
@@ -1204,7 +1244,7 @@ function netSend(dt){
 function poseRemote(r,dt){
   const c=r.c,st=r.st,md=r.md,fl=r.fl,air=!!(fl&1),tuck=!!(fl&2),stA=!!(fl&4),worn=!!(fl&8);
   const gear=r.gear===1?'ski':r.gear===2?'board':null,sl=SLEDS[r.sled]||null,onefoot=md==='onefoot',moving=r.sp>0.6;
-  const key=[st,md,gear,worn,sl,st==='walk'&&moving].join('|');
+  const key=[st,md,gear,worn,sl,st==='walk'&&moving,!!(fl&16)].join('|');
   if(key!==r.pk){r.pk=key;
     pose(c,st==='slide'?(md==='ski'?'ski':md==='board'?'board':md==='sled'?'sled':'stand'):(st==='lift'||st==='sit')?'sit':'stand');
     const wear=worn||onefoot,sk=gear==='ski',bd=gear==='board';
@@ -1213,6 +1253,7 @@ function poseRemote(r,dt){
     ['bag','tub'].forEach(k=>{c.sled[k].visible=sl===k&&md==='sled';c.sled[k+'C'].visible=sl===k&&md!=='sled'});
     if(onefoot&&gear==='board')c.body.rotation.y=0.6;
   }
+  if(fl&16&&st!=='lift'&&st!=='sit'){c.armR.rotation.x=-1.25;c.armR.rotation.z=0.3;holdSB(c,true,1)}else if(c.sbm&&c.sbm.visible)holdSB(c,false);
   c.root.rotation.set(0,r.ch,0);
   if(st==='slide'){
     c.root.rotation.z=-r.str*clamp(r.sp/14,0,1)*0.22;
@@ -1224,7 +1265,7 @@ function poseRemote(r,dt){
   else if(st==='walk'&&moving)walkAnim(c,dt,r.sp);
 }
 function netTick(dt){
-  netSend(dt);
+  netSend(dt);updFollow(dt);updLiftWait();
   const now=performance.now()/1000;
   for(const r of NET.remotes.values()){
     if(!r.have)continue;
@@ -1242,6 +1283,148 @@ function netTick(dt){
     if(r.bub){r.bubT-=dt;if(r.bubT<=0){r.c.body.remove(r.bub);r.bub=null}}
   }
 }
+/* ================= 눈싸움 · 사람 누르기 · 따라가기 · 리프트 기다리기 ================= */
+const G_SB=6.9,SB_SPEED=30;
+const AIM={on:false,fp:false,yaw:0,pit:0.06,phase:'pack',t:0,packT:0.9,prevCam:1,lock:null,thr:0,txt:''};
+const HIT_LINES=['아야야!','아 그만해!!','으앗 차가워!','눈 맛있네…','어푸푸!','살려줘요 ㅠㅠ','억울해요~','이얍 복수다!!','내 얼굴~!','앗 차가! 😵'];
+const CHEER_LINES=['명중~!','ㅋㅋ 맞았다!','한 방!','이얍!!','조준 완벽 😎'];
+const NPC_LINES=['으악!','앗 차가!','누구야~!','아야야!','깜짝이야!'];
+const pickL=a=>a[Math.floor(Math.random()*a.length)];
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sbGeo=new THREE.SphereGeometry(0.24,10,8),sbMat=new THREE.MeshLambertMaterial({color:0xffffff});
+const balls=[],sbPool=[],reacts=[],cbubs=[];
+function holdSB(c,vis,k=1){if(!c.sbm){c.sbm=new THREE.Mesh(sbGeo,sbMat);c.sbm.position.set(0,-0.52,0.14);c.armR.add(c.sbm)}c.sbm.visible=vis;c.sbm.scale.setScalar(Math.max(0.05,k))}
+function canSnow(){return !!me&&!AIM.on&&!P.sledOn&&(P.state==='walk'||(P.state==='slide'&&(P.ready||P.speed<1.5)))}
+function snTargets(){const out=[];
+  for(const r of NET.remotes.values()){if(!r.have||!r.c.root.visible)continue;const p=r.c.root.position;out.push({kind:'p',r,name:r.n,x:p.x,y:p.y+1.1,z:p.z,vx:r.vx,vz:r.vz})}
+  for(const n of npcs){const p=n.c.root.position;if(Math.hypot(p.x-P.x,p.z-P.z)>70)continue;out.push({kind:'n',n,name:'스키어',x:p.x,y:p.y+1.1,z:p.z,vx:n.vx||0,vz:n.vz||0})}
+  return out}
+function aimStart(face){
+  if(!canSnow()){toast('멈춰 선 다음에 눈싸움할 수 있어요 ⛄');return}
+  hidePCard();NET.follow=null;P.liftWait=null;P.target=null;P.path=null;$('#quick').classList.remove('on');
+  AIM.on=true;AIM.fp=false;AIM.prevCam=camMode;AIM.phase='pack';AIM.t=0;AIM.packT=0.9;AIM.lock=null;AIM.thr=0;AIM.txt='';
+  AIM.yaw=face?Math.atan2(face.cx-P.x,face.cz-P.z):P.heading;AIM.pit=0.06;
+  document.body.classList.add('aiming');actSig='';toast('⛄ 눈을 뭉치는 중…');
+}
+function aimEnd(){
+  if(!AIM.on)return;AIM.on=false;if(AIM.fp)camMode=AIM.prevCam;AIM.fp=false;
+  holdSB(me,false);pose(me,P.mode==='ski'?'ski':P.mode==='board'?'board':P.mode==='sled'?'sled':'stand');gearVis();
+  document.body.classList.remove('aiming');$('#aim').classList.remove('on','lock');actSig='';
+}
+function updAim(dt){
+  if(!canSnowState()){aimEnd();return}
+  P.speed=0;P.vx=P.vz=0;P.target=null;
+  P.heading+=wrapA(AIM.yaw-P.heading)*Math.min(1,dt*10);
+  P.y=h(P.x,P.z)+(P.state==='walk'&&(inRes()||inCafe())?0.3:0);
+  AIM.t+=dt;AIM.thr=Math.max(0,AIM.thr-dt);
+  const eye=new V3();me.head.getWorldPosition(eye);let best=null,ba=0.3;
+  for(const t of snTargets()){const dx=t.x-eye.x,dy=t.y-eye.y,dz=t.z-eye.z,d=Math.hypot(dx,dy,dz);if(d>55||d<1.5)continue;
+    const ty=Math.atan2(dx,dz),tp=Math.asin(dy/d),da=Math.hypot(wrapA(ty-AIM.yaw),tp-AIM.pit);if(da<ba){ba=da;best={t,d,ty,tp}}}
+  AIM.lock=best;
+  if(best&&!F.down){const k=Math.min(1,dt*4);AIM.yaw+=wrapA(best.ty-AIM.yaw)*k;AIM.pit+=(best.tp-AIM.pit)*k}
+  if(AIM.phase==='pack'){const k=Math.min(1,AIM.t/AIM.packT);holdSB(me,true,k);
+    me.armR.rotation.x=-0.7-Math.sin(AIM.t*14)*0.5*(1-k);me.armR.rotation.z=0.35;if(P.state==='walk')me.body.rotation.x=0.3*(1-k);
+    if(Math.random()<dt*9)puff(P.x+Math.sin(P.heading)*0.6,P.y+0.2,P.z+Math.cos(P.heading)*0.6,1,1,0xffffff,0.8,0.5);
+    if(k>=1){AIM.phase='ready';if(P.state==='walk')me.body.rotation.x=0;if(!AIM.fp){AIM.fp=true;camMode=2;toast('🎯 조준! 화면을 톡 / 던지기 버튼')}}}
+  else{holdSB(me,true,1);me.armR.rotation.x=AIM.thr>0?0.7:-1.25;me.armR.rotation.z=0.3}
+  const aimEl=$('#aim');aimEl.classList.toggle('on',AIM.fp);aimEl.classList.toggle('lock',!!best);
+  const txt=AIM.phase==='pack'?'⛄ 눈 뭉치는 중…':best?`🎯 ${best.t.name}`:'톡 하면 던져요';
+  if(txt!==AIM.txt){AIM.txt=txt;$('#aim b').textContent=txt}
+}
+function canSnowState(){return !P.sledOn&&(P.state==='walk'||(P.state==='slide'&&(P.ready||P.speed<1.5)))}
+function aimThrow(){
+  if(!AIM.on||AIM.phase!=='ready')return;
+  const eye=new V3();me.head.getWorldPosition(eye);let dir;
+  if(AIM.lock){const t=AIM.lock.t,d=Math.hypot(t.x-eye.x,t.y-eye.y,t.z-eye.z),tt=d/SB_SPEED;
+    dir=new V3(t.x+t.vx*tt-eye.x,t.y+0.5*G_SB*tt*tt-eye.y,t.z+t.vz*tt-eye.z).normalize()}
+  else dir=new V3(Math.sin(AIM.yaw)*Math.cos(AIM.pit),Math.sin(AIM.pit),Math.cos(AIM.yaw)*Math.cos(AIM.pit));
+  const a=[eye.x+dir.x*0.5,eye.y+dir.y*0.5-0.1,eye.z+dir.z*0.5,dir.x*SB_SPEED,dir.y*SB_SPEED,dir.z*SB_SPEED].map(v=>+v.toFixed(2));
+  spawnBall(...a,true);
+  if(NET.on&&NET.ws)NET.ws.send(JSON.stringify({t:'sb',a}));
+  AIM.thr=0.3;AIM.phase='pack';AIM.t=0;AIM.packT=0.55;holdSB(me,false);
+}
+function spawnBall(x,y,z,vx,vy,vz,mine){const m=sbPool.pop()||new THREE.Mesh(sbGeo,sbMat);m.position.set(x,y,z);m.visible=true;scene.add(m);balls.push({m,v:new V3(vx,vy,vz),life:3.5,mine})}
+function updBalls(dt){
+  if(!balls.length)return;let tg=null;
+  for(let i=balls.length-1;i>=0;i--){const b=balls[i];let done=false;
+    for(let s=0;s<2&&!done;s++){const sd=dt/2;b.v.y-=G_SB*sd;b.m.position.addScaledVector(b.v,sd);const p=b.m.position;
+      if(p.y<h(p.x,p.z)+0.12){puff(p.x,p.y+0.1,p.z,6,3,0xffffff,1.5,0.8);done=true;break}
+      if(b.mine){if(!tg)tg=snTargets();for(const t of tg){const dx=p.x-t.x,dy=p.y-t.y,dz=p.z-t.z;if(dx*dx+dy*dy+dz*dz<0.9){onBallHit(t,p);done=true;break}}}}
+    b.life-=dt;if(b.life<=0)done=true;
+    if(done){scene.remove(b.m);balls.splice(i,1);sbPool.push(b.m)}}
+}
+function onBallHit(t,p){puff(p.x,p.y,p.z,16,5,0xffffff,2.5,1.2);trickMsg('명중! 🎯');
+  if(t.kind==='p'){reactChar(t.r.c,false,t.r);if(NET.on&&NET.ws)NET.ws.send(JSON.stringify({t:'hit',to:t.r.id}));if(Math.random()<0.5)say(pickL(CHEER_LINES))}
+  else{t.n.fall=1.1;charBubble(t.n.c,pickL(NPC_LINES),2.2)}}
+function iGotHit(){
+  if(!me||P.state==='fallen'||P.state==='edu')return;
+  puff(P.x,P.y+1.2,P.z,16,5,0xffffff,2.5,1.2);reactChar(me,true);
+  const sp=$('#splat');sp.classList.remove('on');void sp.offsetWidth;sp.classList.add('on');
+  trickMsg('퍽! ❄️');say(pickL(HIT_LINES));
+}
+function reactChar(c,mine,r){if(c._reacting)return;c._reacting=true;
+  const R={c,t:0,dur:1.3,mine,r,star:null};const st=label('💫',{bg:'rgba(0,0,0,0)',scale:2.4,font:80});st.position.y=3.3;c.body.add(st);R.star=st;reacts.push(R)}
+const _q=new THREE.Quaternion(),_ax=new V3();
+function applyReacts(dt){
+  for(let i=reacts.length-1;i>=0;i--){const R=reacts[i],c=R.c;R.t+=dt;
+    if(R.t>=R.dur||!c.root.parent){
+      if(R.star){c.body.remove(R.star);if(R.star.material.map)R.star.material.map.dispose();R.star.material.dispose()}
+      c._reacting=false;
+      if(R.mine&&me===c){pose(me,P.mode==='ski'?'ski':P.mode==='board'?'board':P.mode==='sled'?'sled':'stand');gearVis()}else if(R.r)R.r.pk='';
+      reacts.splice(i,1);continue}
+    const e=Math.exp(-R.t*2.4),w=Math.sin(R.t*22)*e,hd=c.root.rotation.y;
+    c.root.quaternion.premultiply(_q.setFromAxisAngle(_ax.set(Math.cos(hd),0,-Math.sin(hd)),-0.5*e));
+    c.root.quaternion.premultiply(_q.setFromAxisAngle(_ax.set(Math.sin(hd),0,Math.cos(hd)),w*0.3));
+    c.root.position.y+=Math.max(0,Math.sin(R.t*12))*0.16*e;
+    c.armL.rotation.z=-(0.22+1.4*e);c.armR.rotation.z=0.22+1.4*e;
+    if(R.star)R.star.position.y=3.3+Math.sin(R.t*9)*0.15}
+}
+function charBubble(c,t,sec){const sp=bubble(t);sp.position.y=3.7;c.body.add(sp);cbubs.push({c,sp,t:sec})}
+function updBubs(dt){for(let i=cbubs.length-1;i>=0;i--){const b=cbubs[i];b.t-=dt;if(b.t<=0){b.c.body.remove(b.sp);if(b.sp.material.map)b.sp.material.map.dispose();b.sp.material.dispose();cbubs.splice(i,1)}}}
+// ----- 사람 누르기 카드 / 따라가기 -----
+const PC={r:null,t:0,u:0},pcEl=$('#pcard');
+function hidePCard(){PC.r=null;pcEl.classList.remove('on')}
+function showPCard(r){PC.r=r;PC.t=8;renderPCard()}
+function renderPCard(){const r=PC.r;if(!r)return;const d=Math.round(Math.hypot(r.cx-P.x,r.cz-P.z)),fol=NET.follow===r.id;
+  pcEl.innerHTML=`<b>👤 ${esc(r.n)}</b><small>${d}m</small><button class="hot" data-a="f">${fol?'⏹ 따라가기 끝':'🚶 따라가기'}</button><button data-a="s">❄️ 눈싸움</button><button data-a="h">👋 인사</button><button data-a="x">✕</button>`;pcEl.classList.add('on')}
+pcEl.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||!PC.r)return;e.stopPropagation();const r=PC.r,a=b.dataset.a;
+  if(a==='x'){hidePCard();return}
+  if(a==='f'){if(NET.follow===r.id){NET.follow=null;toast('따라가기를 멈췄어요')}else followStart(r);renderPCard();return}
+  if(a==='s'){hidePCard();aimStart(r);return}
+  if(a==='h'){hidePCard();emote('wave');say(`${r.n} 님 안녕하세요~ 👋`)}});
+function pickPlayer(sx,sy){let best=null,bd=46;
+  for(const r of NET.remotes.values()){if(!r.have||!r.c.root.visible)continue;const p=r.c.root.position;
+    for(const dy of [0.9,2.3,3.0]){const v=new V3(p.x,p.y+dy,p.z).project(camera);if(v.z>1||v.z<-1)continue;
+      const px=(v.x+1)/2*innerWidth,py=(1-v.y)/2*innerHeight,d=Math.hypot(px-sx,py-sy);if(d<bd){bd=d;best=r}}}
+  return best}
+function followStart(r){
+  if(P.sledOn){toast('썰매에서 내린 다음에 따라갈 수 있어요');return}
+  if(!(P.state==='walk'||(P.state==='slide'&&(P.ready||P.speed<2)))){toast('멈춘 다음에 따라갈 수 있어요');return}
+  if(P.worn||P.onefoot){P.worn=false;P.onefoot=false;setMode()}
+  NET.follow=r.id;r._arr=0;P.liftWait=null;toast(`🚶 ${r.n} 님을 따라가요 (화면을 누르면 멈춰요)`)}
+function updFollow(dt){
+  if(PC.r){PC.t-=dt;if(PC.t<=0||!NET.remotes.has(PC.r.id))hidePCard();else{PC.u-=dt;if(PC.u<=0){PC.u=0.5;const sm=pcEl.querySelector('small');if(sm)sm.textContent=Math.round(Math.hypot(PC.r.cx-P.x,PC.r.cz-P.z))+'m'}}}
+  if(!NET.follow)return;
+  const r=NET.remotes.get(NET.follow);
+  if(!r||P.state!=='walk'){NET.follow=null;return}
+  if(!r.have||AIM.on)return;
+  const dx=r.cx-P.x,dz=r.cz-P.z,d=Math.hypot(dx,dz);
+  if(d>3.4){P.target={x:r.cx-dx/d*2,z:r.cz-dz/d*2};P.path=null}
+  else{P.target=null;if(!r._arr){r._arr=1;toast(`${r.n} 님 옆에 왔어요!`)}}
+}
+// ----- 리프트 기다리기 -----
+function nearLiftL(){let b=null,bd=45;for(const L of lifts){const d=Math.hypot(P.x-L.load.x,P.z-L.load.z);if(d<bd){bd=d;b=L}}return b}
+function liftWaitToggle(){
+  if(P.liftWait){P.liftWait=null;P.target=null;P.path=null;toast('리프트 기다리기를 취소했어요');return}
+  if(!P.ticket){toast('🎫 리프트권이 필요해요! 본관 매표·렌탈 카운터로');return}
+  const L=nearLiftL();if(!L)return;
+  P.liftWait=L;P.reworn=!!(P.worn||P.onefoot);NET.follow=null;
+  if(P.worn||P.onefoot||P.sledOn){P.worn=false;P.onefoot=false;P.sledOn=false;setMode()}
+  P.target={x:L.load.x,z:L.load.z};P.path=null;toast('🚡 승차장으로 가서 의자를 기다려요')}
+function updLiftWait(){
+  if(!P.liftWait)return;if(P.state!=='walk'){if(P.state!=='lift')P.liftWait=null;return}
+  const L=P.liftWait,d=Math.hypot(P.x-L.load.x,P.z-L.load.z);
+  if(d<2.3){if(!P.lwMsg){P.lwMsg=1;toast('⏳ 의자가 오면 자동으로 타요')}}else{P.lwMsg=0;if(!P.target&&!P.path)P.target={x:L.load.x,z:L.load.z}}}
 /* ================= 시작 ================= */
 let selG='m';
 document.querySelectorAll('#start [data-g]').forEach(b=>b.onclick=()=>{document.querySelectorAll('#start [data-g]').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');selG=b.dataset.g});
@@ -1257,7 +1440,7 @@ async function begin(mode){
 }
 $('#goGate').onclick=()=>begin('gate');$('#goSki').onclick=()=>begin('ski');$('#goBoard').onclick=()=>begin('board');
 updHelp();tick();loadAssets().then(applyAssets);
-window.__air={max:0,t:0};window.__ski={NET,get nt(){return trees.length},LANES,step:(n,dt)=>{const out=[];for(let i=0;i<n;i++){if(P.state==='slide')updSlide(dt);out.push([+(P.y-h(P.x,P.z)).toFixed(2),P.air?1:0,P.state[0]])}return out},jump:()=>doJump(),F,get steer(){return steerVal},get mt(){return lastType},P,lifts,pat,h,begin,get me(){return me},setMode,tryUnload};
+window.__air={max:0,t:0};window.__ski={AIM,aimStart,aimThrow,aimEnd,balls,reacts,pickPlayer,followStart,liftWaitToggle,nearLiftL,PC,say,canSnow,NET,get nt(){return trees.length},LANES,step:(n,dt)=>{const out=[];for(let i=0;i<n;i++){if(P.state==='slide')updSlide(dt);out.push([+(P.y-h(P.x,P.z)).toFixed(2),P.air?1:0,P.state[0]])}return out},jump:()=>doJump(),F,get steer(){return steerVal},get mt(){return lastType},P,lifts,pat,h,begin,get me(){return me},setMode,tryUnload};
 })();
 </script>
 </body>

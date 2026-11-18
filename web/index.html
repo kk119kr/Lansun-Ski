@@ -1205,7 +1205,7 @@ function updLoc(){const d=-P.z;let s;
 const clock=new THREE.Clock();let T=0,started=false;
 function tick(){
   requestAnimationFrame(tick);const dt=Math.min(clock.getDelta(),0.05);T+=dt;
-  placeChairs(T,dt);updNPC(dt);updParts(dt);updSky();
+  placeChairs(Date.now()/1000,dt);updNPC(dt);updParts(dt);updSky();
   if(started&&me){
     if(!modalOpen&&!typing){
       if(AIM.on)updAim(dt);else if(P.state==='walk')updWalk(dt);else if(P.state==='slide')updSlide(dt);else if(P.state==='fallen')updFallen(dt);else if(P.state==='lift')updLift(dt);
@@ -1536,6 +1536,17 @@ function followStart(r){
   if(!(P.state==='walk'||(P.state==='slide'&&(P.ready||P.speed<2)))){toast('멈춘 다음에 따라갈 수 있어요');return}
   if(P.worn||P.onefoot){P.worn=false;P.onefoot=false;setMode()}
   NET.follow=r.id;r._arr=0;P.liftWait=null;toast(`🚶 ${r.n} 님을 따라가요 · 리프트도 스키도 같이!`)}
+function joinChair(L,r){
+  let best=null,bd=7;
+  for(const ch of L.chairs){if(ch.s<1||ch.s>L.L1-9)continue;const p=ch.g.position,d=Math.hypot(p.x-r.cx,p.z-r.cz);if(d<bd){bd=d;best=ch}}
+  if(!best)return false;
+  const ch=best;ch.g.updateMatrixWorld(true);
+  let fs=-1,fd=9;for(let i=0;i<4;i++){const w=ch.g.localToWorld(new V3(-1.2+i*0.8,-2.45,0.12)),d=Math.hypot(w.x-r.cx,w.z-r.cz);if(d<fd){fd=d;fs=i}}
+  let si=-1;for(const i of [2,1,3,0]){if(i!==fs&&!ch.seats[i]){si=i;break}}
+  if(si<0)return false;
+  if(P.worn||P.onefoot||P.sledOn){P.worn=false;P.onefoot=false;P.sledOn=false;setMode()}
+  ch.seats[si]='me';P.liftWait=null;P.followLift=false;P.target=null;P.path=null;P.state='lift';askedLift=true;P.lift={L,ch,si,missed:false,phase:'up'};P.air=false;P.vx=P.vz=0;lookYaw=0;lookPitch=-0.1;
+  pose(me,'sit');gearVis();updHelp();toast(`👫 ${r.n} 님과 같은 의자에 탔어요!`);if(!camUser)camMode=1;return true}
 function liftNear(x,z){let b=null,bd=26;for(const L of lifts){const d=segDist(x,z,L.B.x,L.B.z,L.T.x,L.T.z);if(d<bd){bd=d;b=L}}return b}
 function stopFollow(msg){NET.follow=null;P.autoBrake=0;if(P.liftWait&&P.followLift){P.liftWait=null;P.target=null;P.path=null}P.followLift=false;if(msg)toast(msg)}
 const fh=document.querySelector('#followHud');fh.onclick=()=>stopFollow('따라가기를 멈췄어요');
@@ -1553,6 +1564,7 @@ function updFollow(dt){
   if(r.st==='lift'){
     if(P.state==='slide'&&!(P.ready||P.speed<2))return;
     const L=liftNear(r.cx,r.cz);
+    if(L&&P.ticket&&Math.hypot(P.x-L.load.x,P.z-L.load.z)<36&&joinChair(L,r))return;
     if(L&&P.liftWait!==L){
       if(!P.ticket){const now=performance.now();if(!P.noTk||now-P.noTk>5000){P.noTk=now;toast('🎫 리프트권이 있어야 같이 탈 수 있어요')}return}
       if(P.worn||P.onefoot||P.sledOn){P.worn=false;P.onefoot=false;P.sledOn=false;setMode()}

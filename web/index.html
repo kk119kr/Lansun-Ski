@@ -222,7 +222,7 @@ function bubble(text){
 const TOP=660,MID=260,PLATEAU=TOP-13;
 const HDT=(()=>{const N=TOP+300,a=new Float32Array(N+2);let y=0;
   const sl=d=>{const lo=0.07+0.0006*Math.min(d,MID-20),up=0.2+0.26*Math.pow(clamp((d-MID)/(PLATEAU-MID),0,1),1.3);
-    const s0=d<MID?lerp(lo,0.02,smooth(MID-58,MID-18,d)):lerp(0.02,up,smooth(MID+20,MID+60,d));return lerp(s0,0.03,smooth(PLATEAU-26,PLATEAU,d))};
+    const s0=d<MID?lerp(lo,0.02,smooth(MID-16,MID-6,d)):lerp(0.02,up,smooth(MID+20,MID+60,d));return lerp(s0,0.03,smooth(PLATEAU-26,PLATEAU,d))};
   for(let i=1;i<=N+1;i++){y+=sl(i-0.5);a[i]=y}return a})();
 function Hd(d){if(d<=0)return 0;const dm=Math.min(d,TOP+299.9),i=Math.floor(dm),y=HDT[i]+(HDT[i+1]-HDT[i])*(dm-i)+(d>dm?(d-dm)*0.03:0);return d<25?y*smooth(0,25,d):y}
 const LANES=[
@@ -252,7 +252,7 @@ const PADS=[{x:-100,z:-110,r:9},{x:25,z:-(TOP-3),r:10}];
 const ICE=[[300,400],[480,580]];
 function isIce(x,z){const d=-z,l=LN.double;return ICE.some(r=>d>r[0]&&d<r[1])&&Math.abs(x-l.cx(d))<l.w/2}
 const MOG=[[290,400],[450,640]];
-const PIPE=[135,255],PR=6.5,PFL=3.5,PLIP=PFL+PR;
+const PIPE=[135,250],PR=6.5,PFL=3.5,PLIP=PFL+PR;
 function pipeY(off,d){const f=smooth(PIPE[0],PIPE[0]+25,d)*(1-smooth(PIPE[1]-25,PIPE[1],d));if(f<=0||off>=21)return 0;const t=off-PFL;const y=off<=PFL?0:off<PLIP?PR-Math.sqrt(PR*PR-t*t):PR;return y*f*(1-smooth(15,21,off))}
 function inPipeZone(x,d){return d>PIPE[0]-3&&d<PIPE[1]+3&&Math.abs(x-LN.pipe.cx(d))<17.5}
 function h(x,z){
@@ -517,18 +517,23 @@ function makeLift(cfg){
   const u=new V3(T.x-B.x,0,T.z-B.z).normalize(),r=new V3(-u.z,0,u.x),R=2.2;
   const Bu=B.clone().addScaledVector(r,-R),Tu=T.clone().addScaledVector(r,-R),Bd=B.clone().addScaledVector(r,R),Td=T.clone().addScaledVector(r,R);
   const L1=Bu.distanceTo(Tu),LT=Math.PI*R,Lt=2*L1+2*LT;
-  const L={cfg,B,T,u,r,R,Bu,Tu,Bd,Td,L1,LT,Lt,v:cfg.v,chairs:[],name:cfg.name};
+  const NS=80,addA=new Float32Array(NS+1);
+  {const raw=[];for(let i=0;i<=NS;i++){const t=i/NS,x=lerp(B.x,T.x,t),z=lerp(B.z,T.z,t),clr=lerp(B.y,T.y,t)-h(x,z),need=5.4*smooth(0,0.08,t)*(1-smooth(0.92,1,t));raw.push(Math.max(0,need-clr))}
+   const m=raw.map((_,i)=>{let v=0;for(let j=-5;j<=5;j++)v=Math.max(v,raw[clamp(i+j,0,NS)]);return v});
+   for(let i=0;i<=NS;i++){let a=0;for(let j=-5;j<=5;j++)a+=m[clamp(i+j,0,NS)];addA[i]=a/11}}
+  const ad=t=>{const f=clamp(t,0,1)*NS,i=Math.min(NS-1,Math.floor(f));return addA[i]+(addA[i+1]-addA[i])*(f-i)};
+  const L={cfg,B,T,u,r,R,Bu,Tu,Bd,Td,L1,LT,Lt,v:cfg.v,chairs:[],name:cfg.name,ad};
   L.at=(s)=>{s=((s%Lt)+Lt)%Lt;const p=new V3(),dir=new V3();
-    if(s<L1){p.lerpVectors(Bu,Tu,s/L1);dir.subVectors(Tu,Bu).normalize()}
+    if(s<L1){p.lerpVectors(Bu,Tu,s/L1);p.y+=ad(s/L1);dir.subVectors(Tu,Bu).normalize()}
     else if(s<L1+LT){const a=(s-L1)/R;p.copy(T).addScaledVector(r,-Math.cos(a)*R).addScaledVector(u,Math.sin(a)*R);dir.copy(r).multiplyScalar(Math.sin(a)).addScaledVector(u,Math.cos(a))}
-    else if(s<2*L1+LT){p.lerpVectors(Td,Bd,(s-L1-LT)/L1);dir.subVectors(Bd,Td).normalize()}
+    else if(s<2*L1+LT){p.lerpVectors(Td,Bd,(s-L1-LT)/L1);p.y+=ad(1-(s-L1-LT)/L1);dir.subVectors(Bd,Td).normalize()}
     else{const a=(s-2*L1-LT)/R;p.copy(B).addScaledVector(r,Math.cos(a)*R).addScaledVector(u,-Math.sin(a)*R);dir.copy(r).multiplyScalar(-Math.sin(a)).addScaledVector(u,-Math.cos(a))}
     return{p,dir}};
   // 케이블, 타워, 정거장
   const lm=new THREE.LineBasicMaterial({color:0x333a44});
-  [[Bu,Tu],[Td,Bd]].forEach(([a,b])=>scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),lm)));
+  [[Bu,Tu,0],[Td,Bd,1]].forEach(([a,b,rv])=>{const pts=[];for(let i=0;i<=NS;i++){const t=i/NS,p=new V3().lerpVectors(a,b,t);p.y+=ad(rv?1-t:t);pts.push(p)}scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lm))});
   const hl=Math.hypot(T.x-B.x,T.z-B.z);
-  for(let s=18;s<hl-14;s+=42){const x=lerp(B.x,T.x,s/hl),z=lerp(B.z,T.z,s/hl),gy=h(x,z),cy=lerp(B.y,T.y,s/hl);cyl(0.3,0.4,cy-gy+0.6,0x6a7480,x,gy+(cy-gy+0.6)/2,z,null,8);const arm=box(5.4,0.3,0.3,0x6a7480,x,cy+0.4,z);arm.rotation.y=Math.atan2(r.x,r.z)+Math.PI/2;obst.push({t:'c',x,z,r:0.6})}
+  for(let s=18;s<hl-14;s+=42){const x=lerp(B.x,T.x,s/hl),z=lerp(B.z,T.z,s/hl),gy=h(x,z),cy=lerp(B.y,T.y,s/hl)+ad(s/hl);cyl(0.3,0.4,cy-gy+0.6,0x6a7480,x,gy+(cy-gy+0.6)/2,z,null,8);const arm=box(5.4,0.3,0.3,0x6a7480,x,cy+0.4,z);arm.rotation.y=Math.atan2(r.x,r.z)+Math.PI/2;obst.push({t:'c',x,z,r:0.6})}
   [B,T].forEach((P,i)=>{const gy=h(P.x,P.z);const wh=cyl(R+0.3,R+0.3,0.35,0x8a96a3,P.x,P.y+0.5,P.z,null,20);cyl(0.5,0.6,P.y-gy+0.5,0x6a7480,P.x+u.x*(i?1.8:-1.8),gy+(P.y-gy+0.5)/2,P.z+u.z*(i?1.8:-1.8),null,8);
     const hs=box(4,3,3,0x3f6f9f,P.x+u.x*(i?4.5:-4.5),gy+1.5,P.z+u.z*(i?4.5:-4.5));hs.rotation.y=Math.atan2(u.x,u.z);
     obst.push({t:'c',x:P.x+u.x*(i?4.5:-4.5),z:P.z+u.z*(i?4.5:-4.5),r:2.3},{t:'c',x:P.x+u.x*(i?1.8:-1.8),z:P.z+u.z*(i?1.8:-1.8),r:0.7})});
@@ -561,9 +566,9 @@ function makeLift(cfg){
   }
   lifts.push(L);return L;
 }
-const LIFT_MID=makeLift({name:'중간 리프트',bx:25,bz:6,tx:25,tz:-246,v:24,n:12,seed:11,col:0x2f6fb0});
+const LIFT_MID=makeLift({name:'중간 리프트',bx:25,bz:6,tx:25,tz:-262,v:24,n:12,seed:11,col:0x2f6fb0});
 const LIFT_BEG=makeLift({name:'초급 리프트',bx:-82,bz:6,tx:-100,tz:-108,v:15,n:8,seed:23,col:0x3fb950});
-const LIFT_TOP=makeLift({name:'정상 리프트',bx:25,bz:-270,tx:25,tz:-655,v:24,n:19,seed:31,col:0xe5533d});
+const LIFT_TOP=makeLift({name:'정상 리프트',bx:48,bz:-272,tx:25,tz:-655,v:24,n:19,seed:31,col:0xe5533d});
 function chairS(L,ch,t){return ((t*L.v+ch.off)%L.Lt+L.Lt)%L.Lt}
 function placeChairs(t,dt){for(const L of lifts)for(const ch of L.chairs){const s=chairS(L,ch,t),{p,dir}=L.at(s);ch.g.position.copy(p);ch.g.rotation.y=Math.atan2(dir.x,dir.z);ch.s=s;
   ch.bar.rotation.x=lerp(ch.bar.rotation.x,ch.barDown?0:-1.5,Math.min(1,dt*5));
@@ -601,7 +606,7 @@ function gearVis(){if(!me)return;
 }
 const PAR={A:{turn:2.0,grip:6,k:0.004,c:0.3,max:9,redir:0.4},'11':{turn:2.6,grip:8,k:0.008,c:0.03,max:20,redir:0.72},tuck:{turn:1.1,grip:8,k:0.0055,c:0.03,max:23,redir:0.72},
   board:{turn:2.3,grip:7,k:0.008,c:0.04,max:19,redir:0.66},sled:{turn:0.75,grip:2.6,k:0.0035,c:0.12,max:26,redir:0.5},onefoot:{turn:2.1,grip:7,k:0.02,c:0.12,max:8,redir:0.5}};
-function prm(){if(P.mode==='ski')return P.tuck?PAR.tuck:PAR[P.stance];return PAR[P.mode]}
+function prm(){if(P.mode==='ski'){if(P.tuck)return PAR.tuck;if(P.stance==='A'&&inPipeZone(P.x,-P.z))return PAR['11'];return PAR[P.stance]}return PAR[P.mode]}
 function setMode(){ // worn/onefoot/sled에 따라 상태 결정
   const pm=P.mode;if(P.sledOn)P.mode='sled';else if(P.onefoot)P.mode='onefoot';else if(P.worn)P.mode=P.gear;else P.mode=null;
   if(P.mode!==pm){P.ready=(P.mode==='ski'||P.mode==='board'||P.mode==='sled');if(P.ready){P.vx=P.vz=0;if(isTouch)toast('준비 완료! 가고 싶은 쪽을 누르면 방향이 바뀌고, ▶ 출발을 눌러야 미끄러져요')}}
@@ -636,7 +641,7 @@ cvs.addEventListener('pointermove',e=>{mouseX=e.clientX;mouseY=e.clientY;lastTyp
   if(P.state==='lift'||P.state==='sit'){lookYaw-=dx*0.006;lookPitch=clamp(lookPitch-dy*0.004,-1.2,0.8)}});
 function fingerUp(e){if(!F.down||e.pointerId!==F.id)return;F.down=false;const dt=e.timeStamp-F.t0,dy=e.clientY-F.sy,dx=e.clientX-F.sx;
   if(F.moved<14)onTap(e.clientX,e.clientY);
-  else if(dy<-70&&Math.abs(dy)>Math.abs(dx)*1.3)onFlickUp();}
+  else if(dy<-70&&dt<380&&Math.abs(dy)>Math.abs(dx)*1.3)onFlickUp();}
 addEventListener('pointerup',fingerUp);addEventListener('pointercancel',fingerUp);
 function ptrUp(e){ptrs.delete(e.pointerId);if(gest&&ptrs.size<2&&(ptrs.size===0||e.pointerType!=='mouse')){gest=null;if(P.state==='walk'&&camMode>0){camYaw+=camOff;camOff=0}}}
 addEventListener('pointerup',ptrUp);addEventListener('pointercancel',ptrUp);
@@ -648,7 +653,7 @@ function onTap(sx,sy){if(!me||modalOpen)return;
   hidePCard();
   if(P.state==='lift')return;
   if(P.state==='walk'){const g=groundAt(sx,sy);if(g){P.target=g;P.path=null;P.liftWait=null;NET.follow=null;tapRing(g.x,g.z)}}}
-function onFlickUp(){if(P.state==='slide'&&!P.air&&P.mode!=='sled'&&P.mode!=='onefoot')doJump()}
+function onFlickUp(){if(P.state==='slide'&&!P.air&&P.speed>6&&P.mode!=='sled'&&P.mode!=='onefoot')doJump()}
 function doJump(){P.vy=Math.max(P.vy,0)+5.2;P.air=true;P.trick={yaw:0,flip:0}}
 const tring=new THREE.Mesh(new THREE.RingGeometry(0.4,0.65,24),new THREE.MeshBasicMaterial({color:0x2f6fb0,transparent:true,opacity:0}));tring.rotation.x=-Math.PI/2;scene.add(tring);
 function tapRing(x,z){tring.position.set(x,h(x,z)+0.08,z);tring.material.opacity=1}
@@ -968,13 +973,13 @@ function wantDir(){
   if(ix||iz){const yaw=(camMode===0?Math.PI:camYaw)+camOff;return Math.atan2(Math.sin(yaw)*iz-Math.cos(yaw)*ix,Math.cos(yaw)*iz+Math.sin(yaw)*ix)}
   if(F.down){const v=new V3(P.x,P.y+1,P.z).project(camera),px=(v.x+1)/2*innerWidth,py=(1-v.y)/2*innerHeight,sx=F.x-px,sy=F.y-py,dl=Math.hypot(sx,sy);if(dl<28)return null;const cf=new V3();camera.getWorldDirection(cf);cf.y=0;cf.normalize();const cr=new V3(-cf.z,0,cf.x);return Math.atan2(cr.x*sx-cf.x*sy,cr.z*sx-cf.z*sy)}
   return null}
-function startRun(){if(!P.ready)return;P.ready=false;P.vx=Math.sin(P.heading)*1.5;P.vz=Math.cos(P.heading)*1.5;if(P.mode==='sled')startChase();actSig=''}
+function startRun(){if(!P.ready)return;P.ready=false;{const g0=grad(P.x,P.z),v0=Math.hypot(g0.x,g0.z)<0.1?5.5:1.5;P.vx=Math.sin(P.heading)*v0;P.vz=Math.cos(P.heading)*v0}if(P.mode==='sled')startChase();actSig=''}
 function updSlide(dt){
   if(P.ready){const w=wantDir();if(w!==null)P.heading+=wrapA(w-P.heading)*Math.min(1,dt*3);P.vx=P.vz=0;P.speed=0;P.air=false;P.vy=0;P.y=h(P.x,P.z);steerVal=0;brakeAmt=0;return}
   const pr=prm(),ice=isIce(P.x,P.z);
   let ms=0;if(F.down)ms=clamp((F.x-innerWidth/2)/(innerWidth*0.3),-1,1);else if(lastType==='mouse')ms=clamp((mouseX-innerWidth/2)/(innerWidth*0.32),-1,1);
   const fdx=F.x-F.px,fdy=F.y-F.py;F.px=F.x;F.py=F.y;
-  brakeAmt=(keys.s||keys.arrowdown)?1:(F.down?clamp((F.y-F.sy-40)/110,0,1):0);
+  brakeAmt=(keys.s||keys.arrowdown)?1:(F.down?clamp((F.y-F.sy-40)/110,0,1):0);if(P.speed<2.5&&!keys.s&&!keys.arrowdown)brakeAmt=0;
   const kb=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
   steerVal=kb!==0?kb:(Math.abs(ms)<0.06?0:ms);
   if(P.mode==='onefoot'){const w=wantDir();oneWant=w!==null;steerVal=0;brakeAmt=0;if(oneWant)P.heading+=wrapA(w-P.heading)*Math.min(1,dt*5)}
@@ -985,7 +990,7 @@ function updSlide(dt){
     P.vx*=1-0.05*dt;P.vz*=1-0.05*dt;
   }else{
     const spd0=Math.hypot(P.vx,P.vz);
-    if(P.mode!=='onefoot')P.heading-=steerVal*pr.turn*dt*(P.mode==='sled'?1:clamp(0.35+spd0/6,0.35,1));
+    if(P.mode!=='onefoot')P.heading-=steerVal*pr.turn*dt*(P.mode==='sled'?1:spd0<2.5?1.8:clamp(0.35+spd0/6,0.35,1));
     const g=grad(P.x,P.z),gl=1+g.x*g.x+g.z*g.z;P.vx+=-G*g.x/gl*dt;P.vz+=-G*g.z/gl*dt;
     const fx=Math.sin(P.heading),fz=Math.cos(P.heading);
     let vpar=P.vx*fx+P.vz*fz,px=P.vx-vpar*fx,pz=P.vz-vpar*fz;const vperp=Math.hypot(px,pz);

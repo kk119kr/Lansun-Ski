@@ -248,7 +248,7 @@ function corrDist(x,d){
 }
 function laneAt(x,d){for(const l of LANES){if(d>l.d0+4||d<l.d1-4)continue;if(Math.abs(x-l.cx(d))<l.w/2)return l}return null}
 const KICK=[{d:112,s:1.2},{d:80,s:2.2},{d:50,s:3.4}],KX=-58;
-const PADS=[{x:-100,z:-110,r:9},{x:25,z:-(TOP-3),r:10}];
+const PADS=[{x:25,z:-(TOP-3),r:10}];
 const ICE=[[300,400],[480,580]];
 function isIce(x,z){const d=-z,l=LN.double;return ICE.some(r=>d>r[0]&&d<r[1])&&Math.abs(x-l.cx(d))<l.w/2}
 const MOG=[[290,400],[450,640]];
@@ -301,7 +301,7 @@ const trees=[],treeIMs=[];
   for(let x=TX0+4;x<TX1-4;x+=6.3)for(let z=TZ0+6;z<TZ1-4;z+=6.3){
     const px=x+(R()-0.5)*4,pz=z+(R()-0.5)*4,d=-pz;
     if(d<30){if(!(px<-152||px>178)||d<-80)continue}
-    else{const gl=laneAt(px,d);if(gl&&gl.id==='glade'&&d<TOP-26&&d>MID&&Math.abs(px-gl.cx(d))<gl.w/2-1.5){if(R()<0.8)continue}else if(corrDist(px,d)<(gl||d>MID?4.5:2.5))continue;if(Math.abs(px-25)<7&&d<TOP+4)continue;if(segDist(px,pz,-82,8,-100,-110)<7)continue;if(d>TOP-26&&px>-154&&px<178)continue}
+    else{const gl=laneAt(px,d);if(gl&&gl.id==='glade'&&d<TOP-26&&d>MID&&Math.abs(px-gl.cx(d))<gl.w/2-1.5){if(R()<0.8)continue}else if(corrDist(px,d)<(gl||d>MID?4.5:2.5))continue;if(Math.abs(px-25)<7&&d<TOP+4)continue;if(segDist(px,pz,-82,8,-106,-264)<7)continue;if(d>TOP-26&&px>-154&&px<178)continue}
     if(R()<0.22)continue;
     trees.push({x:px,z:pz,s:0.8+R()*0.7});
   }
@@ -398,7 +398,7 @@ const cafeRoof=[];const cafe=building(40,-676,22,10,5.2,0xb98a5e,0x6a3e2a,'☕ �
 // 중간 광장 휴게소·안내판
 building(84,-(MID+2),12,7,3.6,0xb98a5e,0x6a3e2a,'☕ 중간 휴게소');
 {const sg=label('⛰️ 중간 광장',{scale:13,depth:true,bg:'rgba(255,248,230,.97)',font:60});sg.position.set(62,h(62,-MID)+9,-MID);scene.add(sg);
- const s2=label('⬆ 정상 리프트  ·  ⬇ 귀가 / 직활강 / 파크',{scale:12,depth:true,bg:'rgba(255,248,230,.97)',font:40});s2.position.set(62,h(62,-MID)+6.4,-MID);scene.add(s2)}
+ const s2=label('⬇ 하프파이프 · 롤러코스터 · 귀가 · 직활강',{scale:12,depth:true,bg:'rgba(255,248,230,.97)',font:40});s2.position.set(62,h(62,-MID)+6.4,-MID);scene.add(s2)}
 // 입구 게이트
 {box(1.2,6,1.2,0x7a4a32,-8,3,99);box(1.2,6,1.2,0x7a4a32,8,3,99);box(18,1.4,1.4,0x8a5a3c,0,6.4,99);const l=label('⛷️ 랜선 스키 리조트',{scale:7,depth:true});l.position.set(0,8.4,99.8);scene.add(l);obst.push({t:'c',x:-8,z:99,r:0.8},{t:'c',x:8,z:99,r:0.8})}
 // 베이스 식당 테라스 좌석, 가로등
@@ -410,7 +410,11 @@ LANES.forEach(l=>{if(l.id==='glade')return;for(let d=l.d1+30;d<l.d0;d+=75){lamp(
   const im=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.08,0.08,1.7,6),new THREE.MeshLambertMaterial({color:0xffffff}),pp.length),m4=new THREE.Matrix4(),cc=new THREE.Color();
   pp.forEach(([x,z,c],i)=>{m4.makeTranslation(x,h(x,z)+0.85,z);im.setMatrixAt(i,m4);im.setColorAt(i,cc.setHex(c))});scene.add(im)}
 LANES.forEach(l=>{
-  const sd=l.d0-4,sx=l.cx(sd),sz=-sd;cyl(0.12,0.12,3,0x7a4a32,sx,h(sx,sz)+1.5,sz);const lb=label(`${l.icon} ${l.name} · ${l.lv}`,{scale:6,depth:true,bg:l.id==='green'?'#e3f7e6':l.id==='blue'?'#e2efff':l.id==='park'?'#ffefdc':'#e9e9e9'});lb.position.set(sx,h(sx,sz)+3.6,sz);scene.add(lb)});
+  const sd=l.d0-3,gx=l.cx(sd),gz=-sd,gy=h(gx,gz),col=l.id==='double'?0xd8483a:l.col,hw=l.w/2+0.8;
+  [-1,1].forEach(sg=>{const px=gx+sg*hw,py=h(px,gz);cyl(0.22,0.26,7,0x5a3a28,px,py+3.5,gz);obst.push({t:'c',x:px,z:gz,r:0.5})});
+  box(hw*2+0.6,1.5,0.35,col,gx,gy+6.6,gz);const st=box(hw*2,0.3,1.2,col,gx,gy+0.1,gz);st.castShadow=false;
+  const lb=label(`${l.icon} ${l.name}`,{scale:Math.max(8,l.w*0.5),depth:true,bg:'#fffaf0'});lb.position.set(gx,gy+9.3,gz);scene.add(lb);
+  const lv=label(l.lv,{scale:5,depth:true,bg:'rgba(255,255,255,.95)'});lv.position.set(gx,gy+7.8,gz);scene.add(lv)});
 {const l=label('🛷 아래 눈 언덕',{scale:5,depth:true});l.position.set(88,11,12);scene.add(l)}
 
 /* ================= 캐릭터 ================= */
@@ -518,7 +522,7 @@ function makeLift(cfg){
   const Bu=B.clone().addScaledVector(r,-R),Tu=T.clone().addScaledVector(r,-R),Bd=B.clone().addScaledVector(r,R),Td=T.clone().addScaledVector(r,R);
   const L1=Bu.distanceTo(Tu),LT=Math.PI*R,Lt=2*L1+2*LT;
   const NS=80,addA=new Float32Array(NS+1);
-  {const raw=[];for(let i=0;i<=NS;i++){const t=i/NS,x=lerp(B.x,T.x,t),z=lerp(B.z,T.z,t),clr=lerp(B.y,T.y,t)-h(x,z),need=5.4*smooth(0,0.08,t)*(1-smooth(0.92,1,t));raw.push(Math.max(0,need-clr))}
+  {const raw=[];for(let i=0;i<=NS;i++){const t=i/NS,x=lerp(B.x,T.x,t),z=lerp(B.z,T.z,t),clr=lerp(B.y,T.y,t)-h(x,z),need=3.6+1.8*smooth(0,0.08,t)*(1-smooth(0.92,1,t));raw.push(Math.max(0,need-clr))}
    const m=raw.map((_,i)=>{let v=0;for(let j=-5;j<=5;j++)v=Math.max(v,raw[clamp(i+j,0,NS)]);return v});
    for(let i=0;i<=NS;i++){let a=0;for(let j=-5;j<=5;j++)a+=m[clamp(i+j,0,NS)];addA[i]=a/11}}
   const ad=t=>{const f=clamp(t,0,1)*NS,i=Math.min(NS-1,Math.floor(f));return addA[i]+(addA[i+1]-addA[i])*(f-i)};
@@ -528,6 +532,8 @@ function makeLift(cfg){
     else if(s<L1+LT){const a=(s-L1)/R;p.copy(T).addScaledVector(r,-Math.cos(a)*R).addScaledVector(u,Math.sin(a)*R);dir.copy(r).multiplyScalar(Math.sin(a)).addScaledVector(u,Math.cos(a))}
     else if(s<2*L1+LT){p.lerpVectors(Td,Bd,(s-L1-LT)/L1);p.y+=ad(1-(s-L1-LT)/L1);dir.subVectors(Bd,Td).normalize()}
     else{const a=(s-2*L1-LT)/R;p.copy(B).addScaledVector(r,Math.cos(a)*R).addScaledVector(u,-Math.sin(a)*R);dir.copy(r).multiplyScalar(-Math.sin(a)).addScaledVector(u,-Math.cos(a))}
+    if(s>=L1&&s<L1+LT)p.y+=ad(1);else if(s>=2*L1+LT)p.y+=ad(0);
+    if(s>=L1&&s<L1+LT||s>=2*L1+LT)p.y=Math.max(p.y,h(p.x,p.z)+3.7);
     return{p,dir}};
   // 케이블, 타워, 정거장
   const lm=new THREE.LineBasicMaterial({color:0x333a44});
@@ -566,9 +572,8 @@ function makeLift(cfg){
   }
   lifts.push(L);return L;
 }
-const LIFT_MID=makeLift({name:'중간 리프트',bx:25,bz:6,tx:25,tz:-262,v:24,n:12,seed:11,col:0x2f6fb0});
-const LIFT_BEG=makeLift({name:'초급 리프트',bx:-82,bz:6,tx:-100,tz:-108,v:15,n:8,seed:23,col:0x3fb950});
-const LIFT_TOP=makeLift({name:'정상 리프트',bx:48,bz:-272,tx:25,tz:-655,v:24,n:19,seed:31,col:0xe5533d});
+const LIFT_MID=makeLift({name:'중급 리프트 (정상)',bx:25,bz:6,tx:25,tz:-655,v:26,n:30,seed:11,col:0x2f6fb0});
+const LIFT_BEG=makeLift({name:'초급 리프트 (중간 광장)',bx:-82,bz:6,tx:-106,tz:-264,v:18,n:14,seed:23,col:0x3fb950});
 function chairS(L,ch,t){return ((t*L.v+ch.off)%L.Lt+L.Lt)%L.Lt}
 function placeChairs(t,dt){for(const L of lifts)for(const ch of L.chairs){const s=chairS(L,ch,t),{p,dir}=L.at(s);ch.g.position.copy(p);ch.g.rotation.y=Math.atan2(dir.x,dir.z);ch.s=s;
   ch.bar.rotation.x=lerp(ch.bar.rotation.x,ch.barDown?0:-1.5,Math.min(1,dt*5));
@@ -946,7 +951,7 @@ function tryUnload(){const w=liftWindow();if(!w){toast(isTouch?'하차장에 도
   const {L,ch,si}=P.lift;ch.seats[si]=null;ch.barDown=false;
   let px,pz,hd;if(w.where==='top'){px=L.Tu.x-L.r.x*4.5+L.u.x*0.5;pz=L.Tu.z-L.r.z*4.5+L.u.z*0.5;hd=Math.atan2(-L.r.x,-L.r.z)}else{px=L.Bd.x+L.r.x*4;pz=L.Bd.z+L.r.z*4;hd=Math.atan2(L.r.x,L.r.z)}
   P.x=px;P.z=pz;P.y=h(px,pz);P.heading=hd;P.vx=P.vz=0;P.lift=null;P.state='walk';camYaw=hd;P.reworn=false;setMode();if(P.mode==='ski'||P.mode==='board')P.ready=true;actSig='';
-  toast(w.where==='top'?(L===LIFT_MID?'중간 광장 도착! 걸어서 정상 리프트로 가거나, 장비를 신고 코스로 내려가요':(L===LIFT_TOP?'정상 도착! 표지판에서 코스를 고르고 장비를 신어요 ⛷️':'도착! 장비를 신고 ▶ 출발')):'베이스로 돌아왔어요');updHelp();progress();
+  toast(w.where==='top'?(L===LIFT_MID?'정상 도착! 표지판에서 코스를 고르고 장비를 신어요 ⛷️':'중간 광장 도착! 장비를 신고 파이프·귀가·직활강 코스로 내려가요'):'베이스로 돌아왔어요');updHelp();progress();
 }
 function updLift(dt){
   const {L,ch}=P.lift;const sp=liftSeat();P.x=sp.x;P.y=sp.y;P.z=sp.z;P.heading=ch.g.rotation.y;
@@ -996,7 +1001,7 @@ function updSlide(dt){
     let vpar=P.vx*fx+P.vz*fz,px=P.vx-vpar*fx,pz=P.vz-vpar*fz;const vperp=Math.hypot(px,pz);
     const grip=ice?pr.grip*0.35:pr.grip,k=Math.min(1,grip*dt),lost=vperp*k;px*=1-k;pz*=1-k;vpar+=(vpar>=0?1:-1)*lost*pr.redir;
     if(vperp>4&&Math.random()<0.5)puff(P.x,P.y+0.1,P.z,1,2,0xffffff,1.2,0.8);
-    const sp=Math.abs(vpar);let dec=(ice?0.3:1)*pr.c*sp+pr.k*sp*sp+(ice?0.05:0.22);
+    const sp=Math.abs(vpar);let dec=(ice?0.3:1)*pr.c*sp+pr.k*sp*sp+(ice?0.05:0.22);{const dd=-P.z;if(dd>38&&dd<132&&Math.abs(P.x-LN.park.cx(dd))<LN.park.w/2+2)dec*=0.35}
     if(brakeAmt>0){dec+=(P.mode==='sled'?4:7)*brakeAmt;if(sp>3&&Math.random()<0.6*brakeAmt)puff(P.x,P.y+0.1,P.z,1,3,0xffffff,1,1)}
     let ns=Math.max(0,sp-dec*dt);vpar=(vpar>=0?1:-1)*ns;if(vpar<-3)vpar=-3;
     if(P.mode==='onefoot'){kickT-=dt;if(oneWant&&kickT<=0&&vpar<7.6){vpar=Math.min(7.6,Math.max(vpar,0)+2.6);kickT=0.48;kickAnim=1}}
@@ -1148,7 +1153,7 @@ function drawMini(){return;mc.drawImage(miniBg,0,0);
 /* ================= 큰 지도 / 길 안내 ================= */
 const DEST=[
   {k:'desk',n:'🎿 매표·렌탈',x:0,z:67.8,in:true},{k:'food',n:'🍜 푸드코트',x:-24,z:61,in:true},{k:'shop',n:'🛷 매점·썰매',x:18,z:56,in:true},
-  {k:'lift',n:'🚡 중간 리프트',x:0,z:0,lift:0},{k:'beg',n:'🚡 초급 리프트',x:0,z:0,lift:1},{k:'hill',n:'🛷 아래 눈 언덕',x:80,z:20}];
+  {k:'lift',n:'🚡 중급 리프트 (정상)',x:0,z:0,lift:0},{k:'beg',n:'🚡 초급 리프트 (광장)',x:0,z:0,lift:1},{k:'hill',n:'🛷 아래 눈 언덕',x:80,z:20}];
 function destPos(d){if(d.lift!==undefined){const L=lifts[d.lift];return{x:L.load.x-L.u.x*-0,z:L.load.z}}return d}
 function goTo(d){const p=destPos(d),pts=[];const inside=inRes(),tin=!!d.in;
   if(inside&&!tin)pts.push({x:0,z:P.z>62?77.5:46.5}); // 가까운 문으로 나가기
@@ -1175,7 +1180,7 @@ function openMap(){if(!me||P.state==='lift'||P.state==='edu')return;
 $('#mapBtn').addEventListener('click',openMap);
 // 다음 목적지 마커
 const objMark=label('▼',{scale:2.2,bg:'rgba(255,210,63,.95)',fg:'#5a3a00',font:64});scene.add(objMark);objMark.visible=false;let objKey='';
-function objTarget(){if(!started||P.state==='lift'||P.state==='edu')return null;if(!P.ticket||!P.gear)return{n:'🎿 매표·렌탈',x:0,z:65,y:3.2};if(P.state==='walk'&&!P.worn&&Math.abs(-P.z-MID)<40&&P.x<140){const L=LIFT_TOP;return{n:'🚡 정상 리프트',x:L.load.x,z:L.load.z,y:h(L.load.x,L.load.z)+2.6}}if(P.z>-30&&P.state!=='sit'&&!askedLift){const L=lifts[0];return{n:'🚡 '+L.name,x:L.load.x,z:L.load.z,y:h(L.load.x,L.load.z)+2.6}}return null}
+function objTarget(){if(!started||P.state==='lift'||P.state==='edu')return null;if(!P.ticket||!P.gear)return{n:'🎿 매표·렌탈',x:0,z:65,y:3.2};if(P.z>-30&&P.state!=='sit'&&!askedLift){const L=lifts[0];return{n:'🚡 '+L.name,x:L.load.x,z:L.load.z,y:h(L.load.x,L.load.z)+2.6}}return null}
 let askedLift=false;
 function updObj(){const t=objTarget();if(!t){objMark.visible=false;return}objMark.visible=true;objMark.position.set(t.x,t.y+0.4+Math.abs(Math.sin(T*3))*0.6,t.z)}
 /* ================= 위치 표시 ================= */
@@ -1552,7 +1557,7 @@ async function begin(mode){
   if(mode==='gate'){P.x=0;P.z=93;P.heading=Math.PI;P.ticket=false;P.gear=null}
   else{P.x=LIFT_MID.load.x-6;P.z=LIFT_MID.load.z+10;P.heading=Math.PI;P.ticket=true;P.gear=mode;P.worn=false}
   P.y=h(P.x,P.z);buildMe();$('#start').classList.remove('on');started=true;netConnect();camYaw=Math.PI;setMode();progress();updHelp();
-  sys(mode==='gate'?'리조트에 오신 걸 환영해요! 본관 매표·렌탈 카운터부터 들러보세요.':'🎫 리프트권 자동 구매 완료! 파란 원(중간 리프트 승차장)으로 걸어가세요.');
+  sys(mode==='gate'?'리조트에 오신 걸 환영해요! 본관 매표·렌탈 카운터부터 들러보세요.':'🎫 리프트권 자동 구매 완료! 리프트 승차장(초록=초급·광장 / 파랑=중급·정상)으로 걸어가세요.');
 }
 $('#goGate').onclick=()=>begin('gate');$('#goSki').onclick=()=>begin('ski');$('#goBoard').onclick=()=>begin('board');
 updHelp();tick();loadAssets().then(applyAssets);

@@ -46,6 +46,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#cfe6ff;font-family:
 #toast.on{opacity:1;transform:translateX(-50%)}
 #trick{position:fixed;top:30%;left:50%;transform:translate(-50%,-50%);font-size:44px;color:#ffd23f;text-shadow:0 3px 0 #b5800a,0 0 12px rgba(0,0,0,.25);z-index:8;pointer-events:none;opacity:0;transition:opacity .3s}
 #followHud{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9;max-width:56vw;padding:7px 14px;border-radius:20px;background:rgba(47,111,176,.94);color:#fff;font-size:14px;box-shadow:0 2px 10px rgba(30,60,100,.35);text-align:center;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#joy{display:none;position:fixed;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;background:rgba(255,255,255,.28);border:3px solid rgba(255,255,255,.75);box-shadow:0 0 0 2px rgba(40,70,110,.25);z-index:6;pointer-events:none}
+#joy b{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(47,111,176,.85);border:3px solid #fff}
+#jhint{display:none;position:fixed;left:18px;bottom:28px;z-index:3;pointer-events:none;font-size:13px;line-height:1.5;color:#2c3a4a;opacity:.5;text-align:center;border:2px dashed rgba(44,58,74,.45);border-radius:22px;padding:14px 12px}
+body.touch.sliding.joy:not(.joyOn) #jhint{display:block}
 #zones{display:none;position:fixed;left:0;right:0;bottom:0;height:34vh;z-index:3;pointer-events:none;grid-template-columns:36fr 28fr 36fr;opacity:.28}
 #zones i{display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px;font-style:normal;font-size:14px;color:#2c3a4a;border-left:2px dashed rgba(44,58,74,.45)}
 #zones i:first-child{border-left:0}
@@ -151,7 +155,7 @@ body.aiming #chat,body.aiming #tools,body.aiming #obj,body.aiming #best,body.aim
 <div id="obj" class="chip"></div>
 <div id="best" class="chip">🏃 오늘의 최장 도주: -</div>
 <button id="menuBtn">⋯</button><div id="tools"><button id="tCam">🎥 시점</button><button id="tTime">🌗 시간</button><button id="tWear">👕 옷</button><button id="tHelp">❓ 키</button></div>
-<div id="followHud" style="display:none"></div><div id="zones"><i>◀ 왼쪽</i><i>🛑 브레이크</i><i>오른쪽 ▶</i></div><div id="xhair"></div><canvas id="mini" width="340" height="790" style="display:none"></canvas><button id="mapBtn">🗺️</button>
+<div id="followHud" style="display:none"></div><div id="joy"><b id="joyK"></b></div><div id="jhint">👍 왼쪽 엄지: 조이스틱<br>(아래로 = 브레이크)</div><div id="zones"><i>◀ 왼쪽</i><i>🛑 브레이크</i><i>오른쪽 ▶</i></div><div id="xhair"></div><canvas id="mini" width="340" height="790" style="display:none"></canvas><button id="mapBtn">🗺️</button>
 <div id="help"></div>
 <div id="hud"><div id="stance"></div><div id="steer"><i></i></div><div id="spd">0<small>km/h</small></div></div>
 <div id="prompt"></div><div id="acts"></div><div id="brake">브레이크</div>
@@ -632,12 +636,18 @@ function setMode(){ // worn/onefoot/sled에 따라 상태 결정
 }
 
 /* ================= 입력 ================= */
-let steerPref=(()=>{try{return localStorage.getItem('steer')||'hold'}catch(e){return 'hold'}})();
+let steerPref=(()=>{try{return localStorage.getItem('steer')||'joy'}catch(e){return 'joy'}})();
 const keys={};let mouseX=innerWidth/2,mouseY=innerHeight/2,typing=false,modalOpen=false;
 let dragging=false,lastPX=0,lastPY=0,camYaw=Math.PI,lookYaw=0,lookPitch=-0.12;
 // 한 손가락(=마우스) 입력
 const isTouch=matchMedia('(pointer:coarse)').matches;
 function holdMode(){return isTouch&&steerPref==='hold'}
+function joyMode(){return isTouch&&steerPref==='joy'}
+let J=null;const joyEl=document.getElementById('joy'),joyK=document.getElementById('joyK');
+function joyMove(){if(!J)return;const dx=J.x-J.x0,dy=J.y-J.y0,d=Math.hypot(dx,dy),k=d>55?55/d:1;joyK.style.transform=`translate(${dx*k}px,${dy*k}px)`}
+function joyShow(){document.body.classList.add('joyOn');joyEl.style.display='block';joyEl.style.left=J.x0+'px';joyEl.style.top=J.y0+'px';joyMove()}
+function joyEnd(e){if(J&&(!e||e.pointerId===J.id)){J=null;document.body.classList.remove('joyOn');joyEl.style.display='none'}}
+addEventListener('pointerup',joyEnd);addEventListener('pointercancel',joyEnd);
 let lockSteer=0,plDown=-1;function plOn(){return !isTouch&&document.pointerLockElement===renderer.domElement}
 const F={down:false,x:0,y:0,sx:0,sy:0,px:0,py:0,dxf:0,dyf:0,t0:0,moved:0,id:null};let lastType=isTouch?'touch':'mouse';
 const cvs=renderer.domElement;if(isTouch)document.body.classList.add('touch');
@@ -655,16 +665,19 @@ document.addEventListener('mousemove',e=>{if(!plOn()||!me||modalOpen)return;cons
   if(P.state==='lift'||P.state==='sit'){lookYaw-=dx*0.003;lookPitch=clamp(lookPitch-dy*0.0025,-1.2,0.8);return}
   camOff-=dx*0.0028;camPit=clamp(camPit+dy*0.0022,-0.45,0.9)});
 cvs.addEventListener('pointerdown',e=>{initAudio();$('#msg').blur();$('#quick').classList.remove('on');lastType=e.pointerType||'mouse';
+  if(joyMode()&&P.state==='slide'&&!AIM.on&&!J&&e.pointerType!=='mouse'&&e.clientX<innerWidth*0.55){J={id:e.pointerId,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY};joyShow();try{cvs.setPointerCapture(e.pointerId)}catch(_){}return}
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(e.button===2||ptrs.size>=2){F.down=false;F.moved=999;gest=gcen();try{cvs.setPointerCapture(e.pointerId)}catch(_){}return}
   F.down=true;F.id=e.pointerId;F.x=F.sx=F.px=e.clientX;F.y=F.sy=F.py=e.clientY;F.t0=e.timeStamp;F.moved=0;try{cvs.setPointerCapture(e.pointerId)}catch(_){}
 });
 cvs.addEventListener('pointermove',e=>{mouseX=e.clientX;mouseY=e.clientY;lastType=e.pointerType||lastType;
+  if(J&&e.pointerId===J.id){J.x=e.clientX;J.y=e.clientY;joyMove();return}
   if(ptrs.has(e.pointerId)){const p=ptrs.get(e.pointerId);p.x=e.clientX;p.y=e.clientY}
   if(gest){const c=gcen();camOff-=(c.x-gest.x)*0.007;camPit=clamp(camPit+(c.y-gest.y)*0.004,-0.45,0.9);if(c.dist>0&&gest.dist>0)camZoom=clamp(camZoom*gest.dist/c.dist,0.55,2.4);gest=c;gestT=performance.now();return}
   if(!F.down||e.pointerId!==F.id)return;
   const dx=e.clientX-F.x,dy=e.clientY-F.y;F.x=e.clientX;F.y=e.clientY;F.moved+=Math.abs(dx)+Math.abs(dy);
   if(AIM.on){AIM.yaw-=dx*0.0055;AIM.pit=clamp(AIM.pit-dy*0.0045,-0.6,0.95);return}
+  if(joyMode()&&P.state==='slide'){camOff-=dx*0.006;camPit=clamp(camPit+dy*0.004,-0.45,0.9);gestT=performance.now();return}
   if(P.state==='lift'||P.state==='sit'){lookYaw-=dx*0.006;lookPitch=clamp(lookPitch-dy*0.004,-1.2,0.8)}});
 function fingerUp(e){if(!F.down||e.pointerId!==F.id)return;F.down=false;const dt=e.timeStamp-F.t0,dy=e.clientY-F.sy,dx=e.clientX-F.sx;
   if(F.moved<14){if(!(P.state==='slide'&&!P.ready&&dt>180))onTap(e.clientX,e.clientY)}
@@ -701,14 +714,14 @@ const quickEl=$('#quick');quickEl.innerHTML=QUICK.map((t,i)=>`<button data-q="${
 $('#qBtn').onclick=e=>{e.stopPropagation();quickEl.classList.toggle('on')};
 quickEl.addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;if(me)say(QUICK[+b.dataset.q]);quickEl.classList.remove('on')});
 $('#sendBtn').onclick=e=>{e.stopPropagation();const t=msg.value.trim();if(t&&me)say(t);msg.value='';msg.blur()};
-$('#menuBtn').onclick=()=>{if(!me)return;openModal(`<h2>메뉴</h2><div class="menu" style="margin-top:12px"><button id="mCam">🎥 시점 바꾸기<small>${['위에서','뒤에서','1인칭'][camMode]}</small></button><button id="mTime">🌗 시간 바꾸기<small>낮 → 노을 → 밤</small></button><button id="mChat">💬 채팅 쓰기</button><button id="mWear">👕 옷 갈아입기</button><button id="mSteer">🕹️ 조작 방식<small>${steerPref==='hold'?'좌우 누르기':'드래그'}</small></button><button id="mMap">🗺️ 지도 · 길찾기</button><button id="mHelp">❓ 조작법</button><button id="mCred">🎨 에셋 출처</button></div><div class="row"><button class="btn alt" id="mX">닫기</button></div>`,el=>{
+$('#menuBtn').onclick=()=>{if(!me)return;openModal(`<h2>메뉴</h2><div class="menu" style="margin-top:12px"><button id="mCam">🎥 시점 바꾸기<small>${['위에서','뒤에서','1인칭'][camMode]}</small></button><button id="mTime">🌗 시간 바꾸기<small>낮 → 노을 → 밤</small></button><button id="mChat">💬 채팅 쓰기</button><button id="mWear">👕 옷 갈아입기</button><button id="mSteer">🕹️ 조작 방식<small>${steerPref==='joy'?'조이스틱':steerPref==='hold'?'좌우 누르기':'드래그'}</small></button><button id="mMap">🗺️ 지도 · 길찾기</button><button id="mHelp">❓ 조작법</button><button id="mCred">🎨 에셋 출처</button></div><div class="row"><button class="btn alt" id="mX">닫기</button></div>`,el=>{
   el.querySelector('#mCam').onclick=()=>{camUser=true;camMode=(camMode+1)%3;closeModal();toast(['🎥 위에서 보기','🎥 뒤에서 보기','🎥 1인칭'][camMode])};
   el.querySelector('#mTime').onclick=()=>{closeModal();$('#tTime').onclick()};
   el.querySelector('#mChat').onclick=()=>{closeModal();document.body.classList.add('chatOpen');setTimeout(()=>msg.focus(),50)};
-  el.querySelector('#mHelp').onclick=()=>{openModal(`<h2>조작법</h2><div class="sub" style="text-align:left;line-height:1.9;font-size:15px;color:#2c3a4a">👆 걷기: 가고 싶은 쪽을 누르고 있기 / 톡 치면 그곳으로<br>⛷️ 회전: 화면 왼쪽/오른쪽을 꾹 (오래 누를수록 크게)<br>✋ 직진: 손 떼기<br>🛑 브레이크: 화면 가운데를 꾹<br>⤴ 점프: 버튼 또는 위로 튕기기 (공중에서 좌우=스핀)<br>🕹️ 메뉴에서 '드래그 방식'으로 바꿀 수 있어요<br>🚡 리프트 하차: 하차 구간에서 화면 터치<br>✌️ 두 손가락 드래그: 카메라 돌리기 / 벌리기·오므리기: 줌<br>🌀 하프파이프: 벽 쪽으로 비스듬히 타면 립에서 자동으로 떠요<br>🔘 나머지는 오른쪽 아래 버튼</div><div class="row"><button class="btn" id="hX">알겠어요</button></div>`,e2=>e2.querySelector('#hX').onclick=closeModal)};
+  el.querySelector('#mHelp').onclick=()=>{openModal(`<h2>조작법</h2><div class="sub" style="text-align:left;line-height:1.9;font-size:15px;color:#2c3a4a">👆 걷기: 가고 싶은 쪽을 누르고 있기 / 톡 치면 그곳으로<br>⛷️ 조이스틱: 화면 왼쪽을 누른 자리가 중심 → 좌우로 밀면 회전, 아래로 밀면 브레이크<br>👀 오른쪽 화면 끌기: 시야 돌리기<br>⤴ 점프: 버튼 또는 위로 튕기기 (공중에서 좌우=스핀)<br>🕹️ 메뉴에서 '드래그 방식'으로 바꿀 수 있어요<br>🚡 리프트 하차: 하차 구간에서 화면 터치<br>✌️ 두 손가락 드래그: 카메라 돌리기 / 벌리기·오므리기: 줌<br>🌀 하프파이프: 벽 쪽으로 비스듬히 타면 립에서 자동으로 떠요<br>🔘 나머지는 오른쪽 아래 버튼</div><div class="row"><button class="btn" id="hX">알겠어요</button></div>`,e2=>e2.querySelector('#hX').onclick=closeModal)};
   el.querySelector('#mWear').onclick=()=>{closeModal();setTimeout(wearAnywhere,30)};
   el.querySelector('#mCred').onclick=()=>{openModal(`<h2>🎨 에셋 출처</h2><div class="sub" style="text-align:left;line-height:1.8;color:#2c3a4a">눈 덮인 나무·눈사람·썰매·가로등·벤치·선물상자·순록·음식: <b>Kenney</b> (kenney.nl)<br>소파·안락의자·스탠드·러그·선반·액자·원형 테이블: <b>KayKit by Kay Lousberg</b> (kaylousberg.com)<br>모두 CC0(퍼블릭 도메인) 라이선스</div><div class="row"><button class="btn" id="cX">닫기</button></div>`,e2=>e2.querySelector('#cX').onclick=closeModal)};
-  el.querySelector('#mSteer').onclick=()=>{steerPref=steerPref==='hold'?'drag':'hold';try{localStorage.setItem('steer',steerPref)}catch(e){}closeModal();toast(steerPref==='hold'?'🕹️ 좌우 꾹 누르기 · 가운데 꾹 = 브레이크':'🕹️ 드래그 방식 · 손가락 위치로 회전, 아래로 끌면 브레이크')};
+  el.querySelector('#mSteer').onclick=()=>{steerPref=steerPref==='joy'?'hold':steerPref==='hold'?'drag':'joy';try{localStorage.setItem('steer',steerPref)}catch(e){}closeModal();toast(steerPref==='joy'?'🕹️ 조이스틱 · 왼쪽 엄지로 어디든 눌러서 조향, 오른쪽은 시야':steerPref==='hold'?'🕹️ 좌우 꾹 누르기 · 가운데 꾹 = 브레이크':'🕹️ 드래그 방식 · 손가락 위치로 회전, 아래로 끌면 브레이크')};
   el.querySelector('#mMap').onclick=()=>{closeModal();setTimeout(openMap,30)};
   el.querySelector('#mX').onclick=closeModal})};
 $('#tCam').onclick=()=>{camUser=true;camMode=(camMode+1)%3};
@@ -790,7 +803,7 @@ function actions(){const a=[];if(!me||P.state==='edu')return a;
   if(P.ticket&&!P.sledOn&&(P.state==='walk'||(P.state==='slide'&&(P.ready||P.speed<2)))&&nearLiftL())a.push({cls:'main',t:P.liftWait?'⏳ 기다리는 중 (취소)':'🚡 리프트 기다리기',f:liftWaitToggle});
   if(canSnow())a.push({cls:'sub',t:'❄️ 눈던지기',f:()=>aimStart()});
   return a}
-function renderActs(){const a=actions();const sl=(P.state==='slide'&&!P.ready)||P.state==='fallen';actsEl.classList.toggle('top',sl);document.body.classList.toggle('sliding',sl);document.body.classList.toggle('hold',holdMode());const sig=P.state+P.ready+JSON.stringify(a.map(x=>[x.t,x.cls,x.items&&x.items.map(i=>i.t+i.on)]));if(sig===actSig)return;actSig=sig;actsEl.innerHTML='';
+function renderActs(){const a=actions();const sl=(P.state==='slide'&&!P.ready)||P.state==='fallen';actsEl.classList.toggle('top',sl);document.body.classList.toggle('sliding',sl);document.body.classList.toggle('hold',holdMode());document.body.classList.toggle('joy',joyMode());const sig=P.state+P.ready+JSON.stringify(a.map(x=>[x.t,x.cls,x.items&&x.items.map(i=>i.t+i.on)]));if(sig===actSig)return;actSig=sig;actsEl.innerHTML='';
   a.forEach((x,i)=>{if(x.k==='grp'){const g=document.createElement('div');g.className='grp';x.items.forEach(it=>{const b=document.createElement('button');b.className=x.tog?('tog'+(it.on?' on':'')):'sub';b.textContent=it.t;b.onclick=e=>{e.stopPropagation();initAudio();it.f();actSig=''};g.appendChild(b)});actsEl.appendChild(g);return}
     const b=document.createElement('button');b.className=x.cls||'main';b.textContent=x.t;b.onclick=e=>{e.stopPropagation();initAudio();x.f();actSig=''};actsEl.appendChild(b)})}
 
@@ -1001,21 +1014,23 @@ function wantDir(){
   if(ix||iz){const yaw=(camMode===0?Math.PI:camYaw)+camOff;return Math.atan2(Math.sin(yaw)*iz-Math.cos(yaw)*ix,Math.cos(yaw)*iz+Math.sin(yaw)*ix)}
   if(F.down){const v=new V3(P.x,P.y+1,P.z).project(camera),px=(v.x+1)/2*innerWidth,py=(1-v.y)/2*innerHeight,sx=F.x-px,sy=F.y-py,dl=Math.hypot(sx,sy);if(dl<28)return null;const cf=new V3();camera.getWorldDirection(cf);cf.y=0;cf.normalize();const cr=new V3(-cf.z,0,cf.x);return Math.atan2(cr.x*sx-cf.x*sy,cr.z*sx-cf.z*sy)}
   return null}
-function startRun(){if(!P.ready)return;P.ready=false;if(holdMode()&&!startRun.h){startRun.h=1;toast('왼쪽·오른쪽 꾹 = 회전 · 가운데 꾹 = 브레이크 · 점프는 ⤴ 버튼')}{const g0=grad(P.x,P.z),v0=Math.hypot(g0.x,g0.z)<0.1?5.5:1.5;P.vx=Math.sin(P.heading)*v0;P.vz=Math.cos(P.heading)*v0}if(P.mode==='sled')startChase();actSig=''}
+function startRun(){if(!P.ready)return;P.ready=false;if(!startRun.h&&(holdMode()||joyMode())){startRun.h=1;toast(joyMode()?'왼쪽 엄지로 조이스틱 (아래=브레이크) · 오른쪽 끌기=시야 · 점프는 ⤴':'왼쪽·오른쪽 꾹 = 회전 · 가운데 꾹 = 브레이크 · 점프는 ⤴ 버튼')}{const g0=grad(P.x,P.z),v0=Math.hypot(g0.x,g0.z)<0.1?5.5:1.5;P.vx=Math.sin(P.heading)*v0;P.vz=Math.cos(P.heading)*v0}if(P.mode==='sled')startChase();actSig=''}
 function updSlide(dt){
   if(P.ready){const w=wantDir();if(w!==null)P.heading+=wrapA(w-P.heading)*Math.min(1,dt*3);P.vx=P.vz=0;P.speed=0;P.air=false;P.vy=0;P.y=h(P.x,P.z);steerVal=0;brakeAmt=0;return}
   const pr=prm(),ice=isIce(P.x,P.z);
   let ms=0,holdBr=false;const hm=F.down&&holdMode()&&lastType!=='mouse';lockSteer*=1-Math.min(1,dt*0.9);
-  if(hm){const f=F.x/innerWidth,rp=clamp(0.55+(performance.now()-F.t0)/1000*0.5,0.55,1);if(f<0.36)ms=-rp;else if(f>0.64)ms=rp;else holdBr=true}
+  const jm=joyMode()&&P.state==='slide';
+  if(jm){if(J){const dx=J.x-J.x0;ms=Math.abs(dx)<8?0:clamp(dx/55,-1,1)}}
+  else if(hm){const f=F.x/innerWidth,rp=clamp(0.55+(performance.now()-F.t0)/1000*0.5,0.55,1);if(f<0.36)ms=-rp;else if(f>0.64)ms=rp;else holdBr=true}
   else if(F.down&&lastType!=='mouse')ms=clamp((F.x-innerWidth/2)/(innerWidth*0.3),-1,1);
   const fdx=F.x-F.px,fdy=F.y-F.py;F.px=F.x;F.py=F.y;
-  brakeAmt=(keys.s||keys.arrowdown)?1:(F.down&&lastType!=='mouse'?clamp((F.y-F.sy-40)/110,0,1):0);if(hm)brakeAmt=holdBr?1:0;if(P.speed<2.5&&!keys.s&&!keys.arrowdown)brakeAmt=0;if(P.autoBrake&&NET.follow)brakeAmt=Math.max(brakeAmt,P.autoBrake);
+  brakeAmt=(keys.s||keys.arrowdown)?1:(F.down&&lastType!=='mouse'?clamp((F.y-F.sy-40)/110,0,1):0);if(hm)brakeAmt=holdBr?1:0;if(jm)brakeAmt=J?clamp((J.y-J.y0-28)/50,0,1):0;if(P.speed<2.5&&!keys.s&&!keys.arrowdown)brakeAmt=0;if(P.autoBrake&&NET.follow)brakeAmt=Math.max(brakeAmt,P.autoBrake);
   const kb=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
   steerVal=kb!==0?kb:(Math.abs(ms)<0.06?0:ms);
   if(P.mode==='onefoot'){const w=wantDir();oneWant=w!==null;steerVal=0;brakeAmt=0;if(oneWant)P.heading+=wrapA(w-P.heading)*Math.min(1,dt*5)}
   P.tuck=false;
   if(P.air){
-    if(F.down&&lastType!=='mouse'){if(Math.abs(fdx)>2.5)P.trick.yaw+=fdx*0.009;if(P.mode==='board'&&Math.abs(fdy)>3.5)P.trick.flip-=fdy*0.009}
+    if(jm){if(J){P.trick.yaw+=ms*dt*5;if(P.mode==='board')P.trick.flip-=clamp((J.y-J.y0)/55,-1,1)*dt*5}}else if(F.down&&lastType!=='mouse'){if(Math.abs(fdx)>2.5)P.trick.yaw+=fdx*0.009;if(P.mode==='board'&&Math.abs(fdy)>3.5)P.trick.flip-=fdy*0.009}
     if(P.mode==='board'||P.mode==='ski'){if(kb)P.trick.yaw+=kb*6.5*dt;if(P.mode==='board'){const fl=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);if(fl)P.trick.flip+=fl*6*dt}}
     P.vx*=1-0.05*dt;P.vz*=1-0.05*dt;
   }else{

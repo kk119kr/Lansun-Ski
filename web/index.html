@@ -1012,7 +1012,7 @@ let steerVal=0,brakeAmt=0,kickT=0,kickAnim=0,oneWant=false,flatHintT=0;
 function wantDir(){
   const ix=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),iz=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
   if(ix||iz){const yaw=(camMode===0?Math.PI:camYaw)+camOff;return Math.atan2(Math.sin(yaw)*iz-Math.cos(yaw)*ix,Math.cos(yaw)*iz+Math.sin(yaw)*ix)}
-  if(F.down){const v=new V3(P.x,P.y+1,P.z).project(camera),px=(v.x+1)/2*innerWidth,py=(1-v.y)/2*innerHeight,sx=F.x-px,sy=F.y-py,dl=Math.hypot(sx,sy);if(dl<28)return null;const cf=new V3();camera.getWorldDirection(cf);cf.y=0;cf.normalize();const cr=new V3(-cf.z,0,cf.x);return Math.atan2(cr.x*sx-cf.x*sy,cr.z*sx-cf.z*sy)}
+  if(J||F.down){const v=new V3(P.x,P.y+1,P.z).project(camera),px=(v.x+1)/2*innerWidth,py=(1-v.y)/2*innerHeight,sx=J?J.x-J.x0:F.x-px,sy=J?J.y-J.y0:F.y-py,dl=Math.hypot(sx,sy);if(dl<(J?14:28))return null;const cf=new V3();camera.getWorldDirection(cf);cf.y=0;cf.normalize();const cr=new V3(-cf.z,0,cf.x);return Math.atan2(cr.x*sx-cf.x*sy,cr.z*sx-cf.z*sy)}
   return null}
 function startRun(){if(!P.ready)return;P.ready=false;if(!startRun.h&&(holdMode()||joyMode())){startRun.h=1;toast(joyMode()?'왼쪽 엄지로 조이스틱 (아래=브레이크) · 오른쪽 끌기=시야 · 점프는 ⤴':'왼쪽·오른쪽 꾹 = 회전 · 가운데 꾹 = 브레이크 · 점프는 ⤴ 버튼')}{const g0=grad(P.x,P.z),v0=Math.hypot(g0.x,g0.z)<0.1?5.5:1.5;P.vx=Math.sin(P.heading)*v0;P.vz=Math.cos(P.heading)*v0}if(P.mode==='sled')startChase();actSig=''}
 function updSlide(dt){

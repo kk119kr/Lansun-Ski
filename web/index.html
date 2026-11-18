@@ -143,7 +143,7 @@ body.aiming #chat,body.aiming #tools,body.aiming #obj,body.aiming #best,body.aim
 <div id="obj" class="chip"></div>
 <div id="best" class="chip">🏃 오늘의 최장 도주: -</div>
 <button id="menuBtn">⋯</button><div id="tools"><button id="tCam">🎥 시점</button><button id="tTime">🌗 시간</button><button id="tWear">👕 옷</button><button id="tHelp">❓ 키</button></div>
-<canvas id="mini" width="170" height="385" style="display:none"></canvas><button id="mapBtn">🗺️</button>
+<canvas id="mini" width="340" height="790" style="display:none"></canvas><button id="mapBtn">🗺️</button>
 <div id="help"></div>
 <div id="hud"><div id="stance"></div><div id="steer"><i></i></div><div id="spd">0<small>km/h</small></div></div>
 <div id="prompt"></div><div id="acts"></div><div id="brake">브레이크</div>
@@ -829,8 +829,8 @@ function sitDown(where,f){
   const s=seatFor(where);P.seatPos=s;P.state='sit';P.x=s.x;P.z=s.z;P.y=h(s.x,s.z)+0.3;P.vx=P.vz=0;P.heading=s.yaw;P.sitT=0;P.food=f;P.sitWhere=where;P.ate=false;P.eatP=0;
   pose(me,'sit');me.body.position.y=0.3;gearVis();prevCam=camMode;camMode=1;lookYaw=0;lookPitch=-0.1;camPit=0;
   if(foodMesh)scene.remove(foodMesh);foodMesh=new THREE.Group();const F=FOODS[f];
-  const tx=s.x+Math.sin(s.yaw)*0.7+Math.cos(s.yaw)*0.95,tz=s.z+Math.cos(s.yaw)*0.7-Math.sin(s.yaw)*0.95,ty=P.y+(where==='cafe'?0.82:0.72);
-  foodMesh.position.set(tx,ty,tz);foodMesh.rotation.y=s.yaw;P.foodS=2.2;foodMesh.scale.setScalar(2.2);scene.add(foodMesh);buildFood(f,foodMesh);
+  const fw=where==='cafe'?1.0:1.2,lf=where==='cafe'?0.95:0.6,tx=s.x+Math.sin(s.yaw)*fw+Math.cos(s.yaw)*lf,tz=s.z+Math.cos(s.yaw)*fw-Math.sin(s.yaw)*lf,ty=P.y+(where==='cafe'?0.82:0.72);
+  foodMesh.position.set(tx,ty,tz);foodMesh.rotation.y=s.yaw;P.foodS=1.8;foodMesh.scale.setScalar(1.8);scene.add(foodMesh);buildFood(f,foodMesh);
   if(!plumb){plumb=new THREE.Mesh(new THREE.OctahedronGeometry(0.14),new THREE.MeshBasicMaterial({color:0x4cff6a}));plumb.scale.y=1.7;scene.add(plumb)}plumb.visible=true;plumb.material.color.setHex(0x4cff6a);
   $('#needs').classList.add('on');$('#needsB').style.width='0%';$('#needsE').textContent=F.e;$('#needsT').textContent='냠냠';
   toast(`${F.e} ${F.n} 맛있게 먹는 중… 뷰도 구경해요 (E로 일어나기)`);updHelp();
@@ -1115,12 +1115,26 @@ function drawFX(){return;const n=Math.floor((P.speed-17)*1.2),cx=fx.width/2,cy=f
 const mini=$('#mini'),mc=mini.getContext('2d'),MW=mini.width,MH=mini.height;
 const mxf=x=>(x-TX0)/(TX1-TX0)*MW,mzf=z=>(z-TZ0)/(TZ1-TZ0)*MH;
 const miniBg=document.createElement('canvas');miniBg.width=MW;miniBg.height=MH;
-{const g=miniBg.getContext('2d');g.fillStyle='#e9f1f8';g.fillRect(0,0,MW,MH);g.fillStyle='#cfe0cf';
-  for(let i=0;i<trees.length;i+=3){const t=trees[i];g.fillRect(mxf(t.x),mzf(t.z),1.5,1.5)}
-  LANES.forEach(l=>{g.strokeStyle=l.id==='double'?'#d8483a':hex(l.col);g.lineWidth=Math.max(2,l.w/(TX1-TX0)*MW);g.globalAlpha=0.55;g.beginPath();for(let d=l.d1;d<=l.d0;d+=6){const x=mxf(l.cx(d)),z=mzf(-d);d===l.d1?g.moveTo(x,z):g.lineTo(x,z)}g.stroke();g.globalAlpha=1});
-  g.strokeStyle='#2c3a4a';g.lineWidth=1.5;lifts.forEach(L=>{g.setLineDash([3,2]);g.beginPath();g.moveTo(mxf(L.B.x),mzf(L.B.z));g.lineTo(mxf(L.T.x),mzf(L.T.z));g.stroke();g.setLineDash([])});
-  g.fillStyle='#8a5a3c';g.fillRect(mxf(RES.x1),mzf(RES.z1),mxf(RES.x2)-mxf(RES.x1),mzf(RES.z2)-mzf(RES.z1));[[88,62],[40,-676]].forEach(([x,z])=>g.fillRect(mxf(x)-3,mzf(z)-2,6,4));
-  g.fillStyle='#2c3a4a';g.font='10px Jua';g.fillText('정상',mxf(40)-10,mzf(-676)-5);g.fillText('리조트',mxf(0)-15,mzf(RES.z2)+11)}
+{const g=miniBg.getContext('2d'),X=x=>mxf(x),Z=z=>mzf(z),k=MW/170;
+  // 눈 바탕 + 음영(지형 높낮이)
+  const bgG=g.createLinearGradient(0,0,0,MH);bgG.addColorStop(0,'#dfeaf6');bgG.addColorStop(1,'#f4f8fc');g.fillStyle=bgG;g.fillRect(0,0,MW,MH);
+  const st=4*k/2;for(let py=0;py<MH;py+=st)for(let px=0;px<MW;px+=st){const wx=TX0+(px+st/2)/MW*(TX1-TX0),wz=TZ0+(py+st/2)/MH*(TZ1-TZ0),gr=grad(wx,wz),l=clamp(0.5+(-gr.x*0.55+gr.z*0.45)*1.3,0,1);
+    const hh=h(wx,wz),c0=[236,244,251],c1=[184,203,224];g.fillStyle=`rgb(${(c1[0]+(c0[0]-c1[0])*l)|0},${(c1[1]+(c0[1]-c1[1])*l)|0},${(c1[2]+(c0[2]-c1[2])*l)|0})`;g.fillRect(px,py,st+0.6,st+0.6)}
+  // 숲
+  g.fillStyle='rgba(74,140,98,.55)';for(let i=0;i<trees.length;i+=2){const t=trees[i];g.beginPath();g.arc(X(t.x),Z(t.z),1.5*k,0,7);g.fill()}
+  // 중간 광장
+  {const y0=Z(-(MID+30)),y1=Z(-(MID-30));g.fillStyle='rgba(255,255,255,.7)';g.strokeStyle='rgba(120,150,185,.7)';g.lineWidth=1.2*k;g.setLineDash([4*k,3*k]);g.beginPath();g.roundRect(X(-150),y0,X(174)-X(-150),y1-y0,10*k);g.fill();g.stroke();g.setLineDash([])}
+  // 코스: 흰 테두리 + 색
+  g.lineCap='round';g.lineJoin='round';
+  LANES.forEach(l=>{const col=l.id==='double'?'#d8483a':hex(l.col),wd=Math.max(2.2*k,l.w/(TX1-TX0)*MW*0.9);
+    [[wd+2.4*k,'#fff',0.95],[wd,col,0.85]].forEach(([lw,c,al])=>{g.strokeStyle=c;g.lineWidth=lw;g.globalAlpha=al;g.beginPath();for(let d=l.d1;d<=l.d0;d+=6){const x=X(l.cx(d)),z=Z(-d);d===l.d1?g.moveTo(x,z):g.lineTo(x,z)}g.stroke()});g.globalAlpha=1});
+  // 리프트
+  lifts.forEach(L=>{g.strokeStyle='#2c3a4a';g.lineWidth=1.3*k;g.setLineDash([4*k,3*k]);g.beginPath();g.moveTo(X(L.B.x),Z(L.B.z));g.lineTo(X(L.T.x),Z(L.T.z));g.stroke();g.setLineDash([]);
+    [L.B,L.T].forEach(p=>{g.fillStyle='#fff';g.strokeStyle='#2c3a4a';g.lineWidth=1.3*k;g.beginPath();g.arc(X(p.x),Z(p.z),3.2*k,0,7);g.fill();g.stroke()})});
+  // 건물
+  g.fillStyle='#8a5a3c';g.strokeStyle='#fff';g.lineWidth=1.4*k;
+  [[RES.x1,RES.z1,RES.x2-RES.x1,RES.z2-RES.z1],[84,59,8,6],[36,-681,8,10]].forEach(([x,z,w,d])=>{g.beginPath();g.roundRect(X(x),Z(z),X(x+w)-X(x),Z(z+d)-Z(z),2.5*k);g.fill();g.stroke()});
+  g.strokeStyle='rgba(60,90,130,.55)';g.lineWidth=2.5*k;g.strokeRect(1.2*k,1.2*k,MW-2.4*k,MH-2.4*k)}
 function drawMini(){return;mc.drawImage(miniBg,0,0);
   for(const n of npcs){mc.fillStyle='#888';mc.fillRect(mxf(n.x)-1,mzf(n.z)-1,2,2)}
   if(pat.on){mc.fillStyle='#e5533d';mc.beginPath();mc.arc(mxf(pat.x),mzf(pat.z),3.5,0,7);mc.fill()}
@@ -1136,18 +1150,23 @@ function goTo(d){const p=destPos(d),pts=[];const inside=inRes(),tin=!!d.in;
   if(!inside&&tin){const front=P.z>62;pts.push({x:0,z:front?78:46},{x:0,z:front?72:52})}
   if(inside&&!tin&&p.z<48&&P.z>62){pts.length=0;pts.push({x:0,z:52},{x:0,z:46})}
   pts.push({x:p.x,z:p.z});P.target=pts.shift();P.path=pts;if(P.worn||P.onefoot||P.sledOn){P.worn=false;P.onefoot=false;P.sledOn=false;setMode()}toast(`${d.n}(으)로 걸어가요`)}
-function drawMap(c,W,H,big){const g=c.getContext('2d');const sx=x=>(x-TX0)/(TX1-TX0)*W,sz=z=>(z-TZ0)/(TZ1-TZ0)*H;
+function drawMap(c,W,H,big){const g=c.getContext('2d');const sx=x=>(x-TX0)/(TX1-TX0)*W,sz=z=>(z-TZ0)/(TZ1-TZ0)*H,k=W/170;
   g.drawImage(miniBg,0,0,W,H);
-  if(big){g.font='13px Jua';g.textAlign='center';
-    LANES.forEach((l,li)=>{const d=l.d1+(l.d0-l.d1)*(l.d0<300?0.5:0.25+0.1*(li%6));g.fillStyle='rgba(255,255,255,.9)';const t=`${l.icon}${l.name.split(' ')[0]}`;const tw=g.measureText(t).width+8;g.fillRect(sx(l.cx(d))-tw/2,sz(-d)-9,tw,16);g.fillStyle='#2c3a4a';g.fillText(t,sx(l.cx(d)),sz(-d)+3)});
-    [['🏔️ 리조트',0,RES.z2+12],['☕ 정상 카페',40,-557],['🚨 교육실',88,72],['🛷 눈 언덕',88,25]].forEach(([t,x,z])=>{g.fillStyle='#2c3a4a';g.fillText(t,sx(x),sz(z))})}
-  if(pat.on){g.fillStyle='#e5533d';g.beginPath();g.arc(sx(pat.x),sz(pat.z),big?6:3.5,0,7);g.fill()}
-  g.save();g.translate(sx(P.x),sz(P.z));g.rotate(-P.heading);g.fillStyle='#2f6fb0';g.strokeStyle='#fff';g.lineWidth=2;const r=big?10:6;g.beginPath();g.moveTo(0,r);g.lineTo(r*0.7,-r*0.7);g.lineTo(-r*0.7,-r*0.7);g.closePath();g.fill();if(big)g.stroke();g.restore()}
+  const pill=(t,x,y,bg,fg,fs)=>{g.font=`${fs}px Jua, sans-serif`;const tw=g.measureText(t).width+10*k*0.6,hh=fs+6;g.fillStyle=bg;g.beginPath();g.roundRect(x-tw/2,y-hh/2,tw,hh,hh/2);g.fill();g.fillStyle=fg;g.textAlign='center';g.textBaseline='middle';g.fillText(t,x,y+1)};
+  if(big){const fs=9.5*k;
+    LANES.forEach((l,li)=>{const d=l.d1+(l.d0-l.d1)*(l.d0<300?0.5:0.22+0.11*(li%6));pill(`${l.icon} ${l.name.split(' ')[0]}`,sx(l.cx(d)),sz(-d),'rgba(255,255,255,.93)','#2c3a4a',fs)});
+    pill('🏔️ 리조트',sx(0),sz(RES.z2+13),'rgba(255,248,230,.95)','#6a3e2a',fs*1.1);pill('☕ 정상 카페',sx(40),sz(-696),'rgba(255,248,230,.95)','#6a3e2a',fs);
+    pill('⛰️ 중간 광장',sx(10),sz(-MID),'rgba(47,111,176,.92)','#fff',fs);pill('🚨 교육실',sx(88),sz(74),'rgba(255,255,255,.9)','#2c3a4a',fs*0.9);pill('🛷 눈 언덕',sx(88),sz(27),'rgba(255,255,255,.9)','#2c3a4a',fs*0.9);
+    pill('N ↑',sx(TX1-22),sz(TZ0+22),'rgba(255,255,255,.9)','#2c3a4a',fs*0.9)}
+  if(pat.on){g.fillStyle='#e5533d';g.strokeStyle='#fff';g.lineWidth=1.5*k;g.beginPath();g.arc(sx(pat.x),sz(pat.z),(big?4.2:2.6)*k,0,7);g.fill();g.stroke()}
+  // 내 위치
+  const px=sx(P.x),pz=sz(P.z);g.fillStyle='rgba(47,111,176,.22)';g.beginPath();g.arc(px,pz,(big?11:7)*k,0,7);g.fill();
+  g.save();g.translate(px,pz);g.rotate(-P.heading);g.fillStyle='#2f6fb0';g.strokeStyle='#fff';g.lineWidth=1.8*k;const r=(big?6.5:4.5)*k;g.beginPath();g.moveTo(0,r);g.lineTo(r*0.75,-r*0.75);g.lineTo(0,-r*0.35);g.lineTo(-r*0.75,-r*0.75);g.closePath();g.stroke();g.fill();g.restore()}
 function openMap(){if(!me||P.state==='lift'||P.state==='edu')return;
   const atBase=P.z>-40,canGo=P.state==='walk'||(P.state==='slide'&&P.speed<2);
-  openModal(`<h2>🗺️ 지도</h2><canvas id="bigmap" width="250" height="484" style="display:block;margin:6px auto;border-radius:14px;border:3px solid #cfdcea;width:min(250px,64vw);height:auto"></canvas>
+  openModal(`<h2>🗺️ 지도</h2><canvas id="bigmap" width="340" height="790" style="display:block;margin:6px auto;border-radius:16px;box-shadow:0 3px 12px rgba(40,70,110,.25);width:min(190px,50vw);height:auto"></canvas>
    ${atBase?`<label>여기로 걸어가기</label><div class="menu">${DEST.map((d,i)=>`<button data-d="${i}" ${canGo?'':'disabled'}>${d.n}</button>`).join('')}</div>`:'<div class="sub">정상에서는 코스를 타고 내려가요 · 정상 카페는 리프트 하차장 바로 옆이에요</div>'}
-   <div class="row"><button class="btn alt" id="mpX">닫기</button></div>`,el=>{drawMap(el.querySelector('#bigmap'),250,484,true);el.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{closeModal();goTo(DEST[+b.dataset.d])});el.querySelector('#mpX').onclick=closeModal})}
+   <div class="row"><button class="btn alt" id="mpX">닫기</button></div>`,el=>{drawMap(el.querySelector('#bigmap'),340,790,true);el.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{closeModal();goTo(DEST[+b.dataset.d])});el.querySelector('#mpX').onclick=closeModal})}
 $('#mapBtn').addEventListener('click',openMap);
 // 다음 목적지 마커
 const objMark=label('▼',{scale:2.2,bg:'rgba(255,210,63,.95)',fg:'#5a3a00',font:64});scene.add(objMark);objMark.visible=false;let objKey='';

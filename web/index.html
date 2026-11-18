@@ -1097,7 +1097,10 @@ function updFallen(dt){
   P.fallT-=dt;P.vx*=Math.pow(0.15,dt);P.vz*=Math.pow(0.15,dt);P.x+=P.vx*dt;P.z+=P.vz*dt;collidePush(0.4);P.y=h(P.x,P.z);
   const t=2.2-P.fallT,rot=t<0.8?t*7.5*P.tumble.dir:(t<1.7?Math.PI/2*P.tumble.dir:lerp(Math.PI/2*P.tumble.dir,0,(t-1.7)/0.5));
   me.root.rotation.x=P.tumble.ax==='x'?rot:0;me.root.rotation.z=P.tumble.ax==='z'?rot:0;
-  if(P.fallT<=0){me.root.rotation.x=me.root.rotation.z=0;P.vx=P.vz=0;P.state=P.mode?'slide':'walk';setMode()}
+  if(P.fallT<=0){me.root.rotation.x=me.root.rotation.z=0;P.vx=P.vz=0;P.state=P.mode?'slide':'walk';setMode();
+    if(P.state==='slide'&&P.mode!=='sled'&&P.mode!=='onefoot'){const g={x:(h(P.x+4,P.z)-h(P.x-4,P.z))/8,z:(h(P.x,P.z+4)-h(P.x,P.z-4))/8},gl=Math.hypot(g.x,g.z);
+      if(gl>0.03){const fl=Math.atan2(-g.x,-g.z),dh=wrapA(fl-P.heading);if(Math.abs(dh)>1.0)P.heading=fl-Math.sign(dh)*0.45;
+        const v0=Math.min(4.5,2+gl*14);P.vx=Math.sin(P.heading)*v0;P.vz=Math.cos(P.heading)*v0;P.speed=v0}}}
 }
 
 /* ================= 코스 기록 ================= */

@@ -663,7 +663,7 @@ addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 const msg=$('#msg');msg.addEventListener('focus',()=>typing=true);msg.addEventListener('blur',()=>{typing=false;document.body.classList.remove('chatOpen')});
 msg.addEventListener('keydown',e=>{if(e.key==='Enter'){const t=msg.value.trim();if(t)say(t);msg.value='';msg.blur();e.preventDefault()}if(e.key==='Escape')msg.blur();e.stopPropagation()});
 if(isTouch)msg.placeholder='채팅…';
-const QUICK=['안녕하세요~ 👋','같이 타요!','아 그만해!!','으앗 차가워!','눈싸움 할래요? ❄️','이얍!!','맞혔다 ㅋㅋ','살려줘요 ㅠㅠ','경치 최고예요~','한 번 더!','리프트 같이 타요~','으아아아!!','고마워요 ☺️','잠깐만 기다려줘요~','여기예요 여기!','와 대박…','귀여워라 🐣','조심해요~!'];
+const QUICK=['안녕하세요~ 👋','같이 타요!','아 그만해!!','으앗 차가워!','눈던지기 할래요? ❄️','이얍!!','맞혔다 ㅋㅋ','살려줘요 ㅠㅠ','경치 최고예요~','한 번 더!','리프트 같이 타요~','으아아아!!','고마워요 ☺️','잠깐만 기다려줘요~','여기예요 여기!','와 대박…','귀여워라 🐣','조심해요~!'];
 const quickEl=$('#quick');quickEl.innerHTML=QUICK.map((t,i)=>`<button data-q="${i}">${t}</button>`).join('');
 $('#qBtn').onclick=e=>{e.stopPropagation();quickEl.classList.toggle('on')};
 quickEl.addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;if(me)say(QUICK[+b.dataset.q]);quickEl.classList.remove('on')});
@@ -755,7 +755,7 @@ function actions(){const a=[];if(!me||P.state==='edu')return a;
   if(!isTouch&&P.state==='slide'&&P.mode!=='sled'&&P.mode!=='onefoot')a.push({cls:'sub',t:'⤴ 점프',f:()=>{if(!P.air)doJump()}});
   if(P.mode==='ski'&&P.state==='slide')a.push({k:'grp',items:[{t:'A자',on:P.stance==='A',f:()=>{if(P.stance!=='A')onPress('q')}},{t:'11자',on:P.stance==='11',f:()=>{if(P.stance!=='11')onPress('q')}}],tog:true});
   if(P.ticket&&!P.sledOn&&(P.state==='walk'||(P.state==='slide'&&(P.ready||P.speed<2)))&&nearLiftL())a.push({cls:'main',t:P.liftWait?'⏳ 기다리는 중 (취소)':'🚡 리프트 기다리기',f:liftWaitToggle});
-  if(canSnow())a.push({cls:'sub',t:'❄️ 눈싸움',f:()=>aimStart()});
+  if(canSnow())a.push({cls:'sub',t:'❄️ 눈던지기',f:()=>aimStart()});
   return a}
 function renderActs(){const a=actions();const sl=(P.state==='slide'&&!P.ready)||P.state==='fallen';actsEl.classList.toggle('top',sl);document.body.classList.toggle('sliding',sl);const sig=P.state+P.ready+JSON.stringify(a.map(x=>[x.t,x.cls,x.items&&x.items.map(i=>i.t+i.on)]));if(sig===actSig)return;actSig=sig;actsEl.innerHTML='';
   a.forEach((x,i)=>{if(x.k==='grp'){const g=document.createElement('div');g.className='grp';x.items.forEach(it=>{const b=document.createElement('button');b.className=x.tog?('tog'+(it.on?' on':'')):'sub';b.textContent=it.t;b.onclick=e=>{e.stopPropagation();initAudio();it.f();actSig=''};g.appendChild(b)});actsEl.appendChild(g);return}
@@ -940,8 +940,8 @@ function liftWindow(){const {L,ch}=P.lift,s=ch.s;if(s>L.L1-5&&s<L.L1-0.3)return{
 function tryUnload(){const w=liftWindow();if(!w){toast(isTouch?'하차장에 도착하면 버튼이 빨갛게 바뀌어요':'하차장에 도착하면 SPACE');return}
   const {L,ch,si}=P.lift;ch.seats[si]=null;ch.barDown=false;
   let px,pz,hd;if(w.where==='top'){px=L.Tu.x-L.r.x*4.5+L.u.x*0.5;pz=L.Tu.z-L.r.z*4.5+L.u.z*0.5;hd=Math.atan2(-L.r.x,-L.r.z)}else{px=L.Bd.x+L.r.x*4;pz=L.Bd.z+L.r.z*4;hd=Math.atan2(L.r.x,L.r.z)}
-  P.x=px;P.z=pz;P.y=h(px,pz);P.heading=hd;P.vx=P.vz=0;P.lift=null;P.state='walk';camYaw=hd;if(P.reworn&&w.where==='top')P.worn=true;P.reworn=false;setMode();if(P.mode==='ski'||P.mode==='board')P.ready=true;actSig='';
-  toast(w.where==='top'?(L===LIFT_MID?'중간 광장 도착! 정상 리프트로 갈아타거나, 코스를 골라 내려가요':(P.ready?'정상 도착! 방향을 정하고 ▶ 출발':'정상 도착! 코스 표지판을 보고 골라보세요 ⛷️')):'베이스로 돌아왔어요');updHelp();progress();
+  P.x=px;P.z=pz;P.y=h(px,pz);P.heading=hd;P.vx=P.vz=0;P.lift=null;P.state='walk';camYaw=hd;P.reworn=false;setMode();if(P.mode==='ski'||P.mode==='board')P.ready=true;actSig='';
+  toast(w.where==='top'?(L===LIFT_MID?'중간 광장 도착! 걸어서 정상 리프트로 가거나, 장비를 신고 코스로 내려가요':(L===LIFT_TOP?'정상 도착! 표지판에서 코스를 고르고 장비를 신어요 ⛷️':'도착! 장비를 신고 ▶ 출발')):'베이스로 돌아왔어요');updHelp();progress();
 }
 function updLift(dt){
   const {L,ch}=P.lift;const sp=liftSeat();P.x=sp.x;P.y=sp.y;P.z=sp.z;P.heading=ch.g.rotation.y;
@@ -1151,7 +1151,7 @@ function openMap(){if(!me||P.state==='lift'||P.state==='edu')return;
 $('#mapBtn').addEventListener('click',openMap);
 // 다음 목적지 마커
 const objMark=label('▼',{scale:2.2,bg:'rgba(255,210,63,.95)',fg:'#5a3a00',font:64});scene.add(objMark);objMark.visible=false;let objKey='';
-function objTarget(){if(!started||P.state==='lift'||P.state==='edu')return null;if(!P.ticket||!P.gear)return{n:'🎿 매표·렌탈',x:0,z:65,y:3.2};if(P.z>-30&&P.state!=='sit'&&!askedLift){const L=lifts[0];return{n:'🚡 '+L.name,x:L.load.x,z:L.load.z,y:h(L.load.x,L.load.z)+2.6}}return null}
+function objTarget(){if(!started||P.state==='lift'||P.state==='edu')return null;if(!P.ticket||!P.gear)return{n:'🎿 매표·렌탈',x:0,z:65,y:3.2};if(P.state==='walk'&&!P.worn&&Math.abs(-P.z-MID)<40&&P.x<140){const L=LIFT_TOP;return{n:'🚡 정상 리프트',x:L.load.x,z:L.load.z,y:h(L.load.x,L.load.z)+2.6}}if(P.z>-30&&P.state!=='sit'&&!askedLift){const L=lifts[0];return{n:'🚡 '+L.name,x:L.load.x,z:L.load.z,y:h(L.load.x,L.load.z)+2.6}}return null}
 let askedLift=false;
 function updObj(){const t=objTarget();if(!t){objMark.visible=false;return}objMark.visible=true;objMark.position.set(t.x,t.y+0.4+Math.abs(Math.sin(T*3))*0.6,t.z)}
 /* ================= 위치 표시 ================= */
@@ -1375,7 +1375,7 @@ function netTick(dt){
     if(r.bub){r.bubT-=dt;if(r.bubT<=0){r.c.body.remove(r.bub);r.bub=null}}
   }
 }
-/* ================= 눈싸움 · 사람 누르기 · 따라가기 · 리프트 기다리기 ================= */
+/* ================= 눈던지기 · 사람 누르기 · 따라가기 · 리프트 기다리기 ================= */
 const G_SB=6.9,SB_SPEED=30;
 const AIM={on:false,fp:false,yaw:0,pit:0.06,phase:'pack',t:0,packT:0.9,prevCam:1,lock:null,thr:0,txt:''};
 const HIT_LINES=['아야야!','아 그만해!!','으앗 차가워!','눈 맛있네…','어푸푸!','살려줘요 ㅠㅠ','억울해요~','이얍 복수다!!','내 얼굴~!','앗 차가! 😵'];
@@ -1392,7 +1392,7 @@ function snTargets(){const out=[];
   for(const n of npcs){const p=n.c.root.position;if(Math.hypot(p.x-P.x,p.z-P.z)>70)continue;out.push({kind:'n',n,name:'스키어',x:p.x,y:p.y+1.1,z:p.z,vx:n.vx||0,vz:n.vz||0})}
   return out}
 function aimStart(face){
-  if(!canSnow()){toast('멈춰 선 다음에 눈싸움할 수 있어요 ⛄');return}
+  if(!canSnow()){toast('멈춰 선 다음에 눈던지기 할 수 있어요 ⛄');return}
   hidePCard();NET.follow=null;P.liftWait=null;P.target=null;P.path=null;$('#quick').classList.remove('on');
   AIM.on=true;AIM.fp=false;AIM.prevCam=camMode;AIM.phase='pack';AIM.t=0;AIM.packT=0.9;AIM.lock=null;AIM.thr=0;AIM.txt='';
   AIM.yaw=face?Math.atan2(face.cx-P.x,face.cz-P.z):P.heading;AIM.pit=0.06;
@@ -1478,7 +1478,7 @@ const PC={r:null,t:0,u:0},pcEl=$('#pcard');
 function hidePCard(){PC.r=null;pcEl.classList.remove('on')}
 function showPCard(r){PC.r=r;PC.t=8;renderPCard()}
 function renderPCard(){const r=PC.r;if(!r)return;const d=Math.round(Math.hypot(r.cx-P.x,r.cz-P.z)),fol=NET.follow===r.id;
-  pcEl.innerHTML=`<b>👤 ${esc(r.n)}</b><small>${d}m</small><button class="hot" data-a="f">${fol?'⏹ 따라가기 끝':'🚶 따라가기'}</button><button data-a="s">❄️ 눈싸움</button><button data-a="h">👋 인사</button><button data-a="x">✕</button>`;pcEl.classList.add('on')}
+  pcEl.innerHTML=`<b>👤 ${esc(r.n)}</b><small>${d}m</small><button class="hot" data-a="f">${fol?'⏹ 따라가기 끝':'🚶 따라가기'}</button><button data-a="s">❄️ 눈던지기</button><button data-a="h">👋 인사</button><button data-a="x">✕</button>`;pcEl.classList.add('on')}
 pcEl.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||!PC.r)return;e.stopPropagation();const r=PC.r,a=b.dataset.a;
   if(a==='x'){hidePCard();return}
   if(a==='f'){if(NET.follow===r.id){NET.follow=null;toast('따라가기를 멈췄어요')}else followStart(r);renderPCard();return}
@@ -1526,9 +1526,9 @@ async function begin(mode){
   P.name=($('#nm').value.trim()||'스키어').slice(0,8);P.gender=selG;
   P.outfit=mode==='board'?{style:'anorak',pattern:'solid',jacket:0x3fb950,jacket2:0xf3efe6,pants:0x222222,pantsStyle:'baggy',hat:'beanie',hatColor:0xf0a23b,lens:0x4fa3ff,neck:null,glove:0x222222,skiCol:0xe5533d,boardCol:0x2f6fb0,gear:'board'}:{style:'jacket',pattern:'twotone',jacket:0xe5533d,jacket2:0x1f3b7a,pants:0x2c3a4a,pantsStyle:'slim',hat:'helmet',hatColor:0xffffff,lens:0xffb347,neck:null,glove:0x333a44,skiCol:0xe5533d,boardCol:0x2f6fb0,gear:'ski'};
   if(mode==='gate'){P.x=0;P.z=93;P.heading=Math.PI;P.ticket=false;P.gear=null}
-  else{P.x=LIFT_MID.load.x-6;P.z=LIFT_MID.load.z+10;P.heading=Math.PI;P.ticket=true;P.gear=mode;P.worn=true}
+  else{P.x=LIFT_MID.load.x-6;P.z=LIFT_MID.load.z+10;P.heading=Math.PI;P.ticket=true;P.gear=mode;P.worn=false}
   P.y=h(P.x,P.z);buildMe();$('#start').classList.remove('on');started=true;netConnect();camYaw=Math.PI;setMode();progress();updHelp();
-  sys(mode==='gate'?'리조트에 오신 걸 환영해요! 본관 매표·렌탈 카운터부터 들러보세요.':'🎫 리프트권 자동 구매 완료! 파란 원(중간 리프트 승차장)으로 가세요.');
+  sys(mode==='gate'?'리조트에 오신 걸 환영해요! 본관 매표·렌탈 카운터부터 들러보세요.':'🎫 리프트권 자동 구매 완료! 파란 원(중간 리프트 승차장)으로 걸어가세요.');
 }
 $('#goGate').onclick=()=>begin('gate');$('#goSki').onclick=()=>begin('ski');$('#goBoard').onclick=()=>begin('board');
 updHelp();tick();loadAssets().then(applyAssets);
